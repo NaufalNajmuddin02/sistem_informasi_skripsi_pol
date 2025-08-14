@@ -1,0 +1,44 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    flex: 1;
+}
+
+
+.jadwal-card {
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.jadwal-card:hover {
+    transform: translateY(-5px);
+}
+
+.status {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.countdown {
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+/* Custom Animation for Icons */
+.bi {
+    transition: transform 0.3s ease;
+}
+
+.jadwal-card:hover .bi {
+    transform: scale(1.1);
+}
+
+/* Status and countdown alignment */
+.status-wrapper {
+    white-space: nowrap;
+}

@@ -1,0 +1,21 @@
+/* main content*/
+.main-content {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 70px);
+}
+
+.form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.date-picker-icon {
+    background-color: #6c757d;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}

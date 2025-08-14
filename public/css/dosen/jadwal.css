@@ -1,0 +1,13 @@
+.card {
+    border: none;
+    border-radius: 8px;
+}
+
+.dropdown-toggle::after {
+    float: right;
+    margin-top: 8px;
+}
+
+.table th {
+    font-weight: 500;
+}
