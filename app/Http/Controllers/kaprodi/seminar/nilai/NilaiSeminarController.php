@@ -14,7 +14,7 @@ class NilaiSeminarController extends Controller
     public function index(Request $request)
     {
         $dosenId = Auth::id();
-$ruangans = Ruangan::all();
+        $ruangans = Ruangan::all();
         $query = Seminar::with('penilaians')
             ->where(function ($q) use ($dosenId) {
                 $q->where('dosen_penilai_1', $dosenId)

@@ -97,21 +97,27 @@
                                 <!-- Nilai -->
                                 <h6><i class="bi bi-bar-chart"></i> Nilai</h6>
                                 <dl class="row small">
-                                    @if($penilaianSaya)
-                                        <dt class="col-sm-5">Nilai Anda</dt>
-                                        <dd class="col-sm-7">{{ number_format($penilaianSaya->nilai_total) }}</dd>
-                                    @endif
+                                    @php
+                                        $penilaian1 = $seminar->penilaians->where('dosen_id', $seminar->dosen_penilai_1)->first();
+                                        $penilaian2 = $seminar->penilaians->where('dosen_id', $seminar->dosen_penilai_2)->first();
+                                    @endphp
 
-                                    @if($penilaianRekan)
-                                        <dt class="col-sm-5">Nilai Rekan</dt>
-                                        <dd class="col-sm-7">{{ number_format($penilaianRekan->nilai_total) }}</dd>
-                                    @endif
+                                    <dt class="col-sm-5">Nilai Dosen Penilai 1</dt>
+                                    <dd class="col-sm-7">
+                                        {{ $penilaian1 ? number_format($penilaian1->nilai_total) : '-' }}
+                                    </dd>
+
+                                    <dt class="col-sm-5">Nilai Dosen Penilai 2</dt>
+                                    <dd class="col-sm-7">
+                                        {{ $penilaian2 ? number_format($penilaian2->nilai_total) : '-' }}
+                                    </dd>
 
                                     @if($seminar->nilai)
                                         <dt class="col-sm-5">Nilai Akhir</dt>
                                         <dd class="col-sm-7"><strong>{{ number_format($seminar->nilai) }}</strong></dd>
                                     @endif
                                 </dl>
+
 
                                 <!-- Tombol Nilai -->
                                 @if(Auth::id() === $seminar->dosen_penilai_1 || Auth::id() === $seminar->dosen_penilai_2)
