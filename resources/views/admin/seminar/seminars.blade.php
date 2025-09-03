@@ -20,25 +20,47 @@
     {{-- Filter --}}
     <div class="card-body">
         <form method="GET" action="{{ route('admin.seminar') }}">
-            <div class="row g-2 align-items-center">
-                <div class="col-md-4 d-flex align-items-center">
-                    <label for="tahun_akademik" class="me-2 mb-0">Pilih Tahun Akademik</label>
+            <div class="row g-3">
+                <!-- Tahun Akademik -->
+                <div class="col-md-3">
+                    <label for="tahun_akademik" class="form-label">Tahun Akademik</label>
                     <select name="tahun_akademik" id="tahun_akademik" class="form-select" onchange="this.form.submit()">
                         <option value="">-- Semua Tahun Akademik --</option>
                         @foreach($daftarTahunAkademik as $tahun)
-                            <option value="{{ $tahun }}" {{ $tahun == request('tahun_akademik') ? 'selected' : '' }}>{{ $tahun }}</option>
+                            <option value="{{ $tahun }}" {{ $tahun == request('tahun_akademik') ? 'selected' : '' }}>
+                                {{ $tahun }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
+
+                <!-- Search -->
                 <div class="col-md-4">
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Cari...">
+                    <label for="search" class="form-label">Cari</label>
+                    <input type="text" name="search" value="{{ request('search') }}" id="search"
+                        class="form-control" placeholder="Nama, Kelas, atau Judul Skripsi">
                 </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Cari</button>
+
+                <!-- Status Jadwal -->
+                <div class="col-md-3">
+                    <label for="status_jadwal" class="form-label">Status Jadwal</label>
+                    <select name="status_jadwal" id="status_jadwal" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Semua --</option>
+                        <option value="belum" {{ request('status_jadwal') == 'belum' ? 'selected' : '' }}>Belum Dijadwalkan</option>
+                        <option value="sudah" {{ request('status_jadwal') == 'sudah' ? 'selected' : '' }}>Sudah Dijadwalkan</option>
+                    </select>
+                </div>
+
+                <!-- Tombol Cari -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Cari
+                    </button>
                 </div>
             </div>
         </form>
     </div>
+
     <br>
 
     {{-- Alert --}}

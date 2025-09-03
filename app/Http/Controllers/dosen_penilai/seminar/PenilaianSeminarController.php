@@ -15,30 +15,55 @@ class PenilaianSeminarController extends Controller
     {
         $dosenId = Auth::id();
         $ruangans = Ruangan::all();
+
+        // Ambil tahun akademik saat ini
+        $tahunSekarang = date('Y') . '/' . (date('Y') + 1);
+
         $query = Seminar::with('penilaians')
             ->where(function ($q) use ($dosenId) {
                 $q->where('dosen_penilai_1', $dosenId)
                 ->orWhere('dosen_penilai_2', $dosenId);
-            });
+            })
+            // hanya tampil tahun akademik sekarang
+            ->where('tahun_akademik', $tahunSekarang);
 
+        // 🔍 Filter pencarian
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
                 ->orWhere('script_title', 'like', "%$search%")
-                ->orWhere('ruangan', 'like', "%$search%");
+                ->orWhereHas('ruangan', function ($qr) use ($search) {
+                    $qr->where('nama', 'like', "%$search%");
+                });
             });
         }
 
-        // Urutkan berdasarkan tanggal seminar (jadwal) dari yang paling dekat
-        $query->whereDate('tanggal', '>=', now())
-        ->orderBy('tanggal', 'asc');
+        // 🔍 Filter status penilaian
+        if ($request->filled('status_nilai')) {
+            if ($request->status_nilai === 'sudah') {
+                $query->whereNotNull('nilai');
+            } elseif ($request->status_nilai === 'belum') {
+                $query->whereNull('nilai');
+            }
+        }
 
+        // ✅ Urutan custom
+        $query->orderByRaw("
+            CASE 
+                WHEN nilai IS NULL THEN 0 ELSE 1 
+            END ASC
+        ")->orderByRaw("
+            CASE 
+                WHEN tanggal >= CURDATE() THEN 0 ELSE 1 
+            END ASC
+        ")->orderBy('tanggal', 'asc');
 
         $seminars = $query->paginate(6);
 
-        return view('dosen_penilai.seminar.index', compact('seminars','ruangans'));
+        return view('dosen_penilai.seminar.index', compact('seminars', 'ruangans', 'tahunSekarang'));
     }
+
 
     public function store(Request $request, $seminarId)
     {

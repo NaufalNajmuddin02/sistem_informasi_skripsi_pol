@@ -14,6 +14,7 @@ class PembagianRuanganPenilaiController extends Controller
     {
         $search = $request->input('search');
         $tahunAkademik = $request->input('tahun_akademik');
+        $statusJadwal = $request->input('status_jadwal'); // 👈 ambil filter status
         $ruangans = Ruangan::all();
 
         $daftarTahunAkademik = Seminar::select('tahun_akademik')
@@ -29,11 +30,32 @@ class PembagianRuanganPenilaiController extends Controller
             ->when($tahunAkademik, function($query) use ($tahunAkademik) {
                 $query->where('tahun_akademik', $tahunAkademik);
             })
+            ->when($statusJadwal, function($query) use ($statusJadwal) {
+                if ($statusJadwal === 'belum') {
+                    $query->whereNull('tanggal')
+                        ->orWhereNull('jam')
+                        ->orWhereNull('jam_selesai')
+                        ->orWhereNull('ruangan_id');
+                } elseif ($statusJadwal === 'sudah') {
+                    $query->whereNotNull('tanggal')
+                        ->whereNotNull('jam')
+                        ->whereNotNull('jam_selesai')
+                        ->whereNotNull('ruangan_id');
+                }
+            })
             ->orderByDesc('tanggal')
             ->paginate(10);
 
-        return view('admin.seminar.seminars', compact('seminars', 'search', 'tahunAkademik', 'daftarTahunAkademik', 'ruangans'));
+        return view('admin.seminar.seminars', compact(
+            'seminars', 
+            'search', 
+            'tahunAkademik', 
+            'daftarTahunAkademik', 
+            'ruangans',
+            'statusJadwal' // 👈 kirim ke view
+        ));
     }
+
 
     
     public function setReschedule($id)
@@ -46,7 +68,6 @@ class PembagianRuanganPenilaiController extends Controller
         return redirect()->route('admin.seminar', ['reschedule_id' => $seminar->id])
             ->with('success', 'Mahasiswa ini telah ditandai untuk penjadwalan ulang. Silakan atur ulang jadwalnya.');
     }
-
 
     public function updateJadwal(Request $request, $id)
     {

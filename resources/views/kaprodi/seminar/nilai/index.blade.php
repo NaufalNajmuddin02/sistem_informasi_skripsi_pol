@@ -23,14 +23,28 @@
         @endif
 
         <!-- Form Search -->
-        <form method="GET" action="{{ route('kaprodi.seminar.penilai') }}" class="mb-4">
-            <div class="input-group">
-                <input type="search" name="search" class="form-control" placeholder="Cari mahasiswa, judul, atau ruangan..." value="{{ request('search') }}" />
-                <button class="btn btn-primary" type="submit">
-                    <i class="bi bi-search"></i> Cari
+        <form method="GET" action="{{ route('kaprodi.seminar.penilai') }}" class="row g-2 mb-4">
+            <div class="col-md-4">
+                <input type="search" name="search" class="form-control"
+                    placeholder="Cari mahasiswa, judul, atau ruangan..." value="{{ request('search') }}" />
+            </div>
+            <div class="col-md-3">
+                <select name="status_nilai" class="form-select">
+                    <option value="">-- Filter Penilaian --</option>
+                    <option value="sudah" {{ request('status_nilai') == 'sudah' ? 'selected' : '' }}>Sudah Dinilai</option>
+                    <option value="belum" {{ request('status_nilai') == 'belum' ? 'selected' : '' }}>Belum Dinilai</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" value="{{ $tahunSekarang }}" disabled>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">
+                    <i class="bi bi-search"></i> Filter
                 </button>
             </div>
         </form>
+
 
         @if($seminars->isEmpty())
             <div class="alert alert-info text-center">Tidak ada jadwal seminar</div>
