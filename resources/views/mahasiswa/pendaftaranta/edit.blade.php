@@ -51,24 +51,17 @@
             $currentJenisLaporan = old('jenis_laporan', $data->jenis_laporan ?? '');
         @endphp
 
-        <div class="form-group">
-            <label>Jenis Laporan</label>
-            
-            <div class="form-check">
-                <input type="radio" name="jenis_laporan" id="laporan_hki" value="Dengan Luaran HKI" class="form-check-input" @checked($currentJenisLaporan == 'Dengan Luaran HKI')>
-                <label for="laporan_hki" class="form-check-label">Dengan Luaran HKI</label>
-            </div>
-
-            <div class="form-check">
-                <input type="radio" name="jenis_laporan" id="laporan_nonhki" value="Tanpa Luaran HKI" class="form-check-input" @checked($currentJenisLaporan == 'Tanpa Luaran HKI')>
-                <label for="laporan_nonhki" class="form-check-label">Tanpa Luaran HKI</label>
-            </div>
-
-            <div class="form-check">
-                <input type="radio" name="jenis_laporan" id="laporan_lainnya" value="Lainnya" class="form-check-input" @checked($currentJenisLaporan == 'Lainnya')>
-                <label for="laporan_lainnya" class="form-check-label">Lainnya</label>
-            </div>
+        <div class="form-group mb-3">
+            <label for="jenis_laporan" class="form-label d-block mb-2">Jenis Laporan</label>
+            <select name="jenis_laporan" id="jenis_laporan" class="form-select" required>
+                <option value="" disabled {{ $currentJenisLaporan == null ? 'selected' : '' }}>Pilih Jenis Laporan</option>
+                <option value="Dengan Luaran HKI"   {{ $currentJenisLaporan == 'Dengan Luaran HKI' ? 'selected' : '' }}>Dengan Luaran HKI</option>
+                <option value="Tanpa Luaran HKI"   {{ $currentJenisLaporan == 'Tanpa Luaran HKI' ? 'selected' : '' }}>Tanpa Luaran HKI</option>
+                <option value="Lainnya"            {{ $currentJenisLaporan == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+            </select>
         </div>
+
+
 
 
         <div class="mb-3">
@@ -102,68 +95,35 @@
         @endphp
 
         <div class="mb-3">
-            <label class="form-label">Asal SLTA <span class="text-danger">*</span></label>
-            <div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="asal_slta" id="sma_ipa" value="SMA/MA-IPA" 
-                        @checked($currentAsalSlta == 'SMA/MA-IPA') />
-                    <label class="form-check-label" for="sma_ipa">SMA/MA-IPA</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="asal_slta" id="sma_ips" value="SMA/MA-IPS" 
-                        @checked($currentAsalSlta == 'SMA/MA-IPS') />
-                    <label class="form-check-label" for="sma_ips">SMA/MA-IPS</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="asal_slta" id="smk_tkj" value="SMK-TKJ" 
-                        @checked($currentAsalSlta == 'SMK-TKJ') />
-                    <label class="form-check-label" for="smk_tkj">SMK-TKJ</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="asal_slta" id="smk_rpl" value="SMK-RPL" 
-                        @checked($currentAsalSlta == 'SMK-RPL') />
-                    <label class="form-check-label" for="smk_rpl">SMK-RPL</label>
-                </div>
-            </div>
+            <label for="asal_slta" class="form-label d-block mb-2">Asal SLTA <span class="text-danger">*</span></label>
+            <select name="asal_slta" id="asal_slta" class="form-select" required>
+                <option value="" disabled {{ $currentAsalSlta == '' ? 'selected' : '' }}>Pilih Asal SLTA</option>
+                <option value="SMA/MA-IPA" {{ $currentAsalSlta == 'SMA/MA-IPA' ? 'selected' : '' }}>SMA/MA-IPA</option>
+                <option value="SMA/MA-IPS" {{ $currentAsalSlta == 'SMA/MA-IPS' ? 'selected' : '' }}>SMA/MA-IPS</option>
+                <option value="SMK-TKJ"    {{ $currentAsalSlta == 'SMK-TKJ'    ? 'selected' : '' }}>SMK-TKJ</option>
+                <option value="SMK-RPL"    {{ $currentAsalSlta == 'SMK-RPL'    ? 'selected' : '' }}>SMK-RPL</option>
+            </select>
         </div>
 
+       @php
+            $currentUkuranToga = old('ukuran_toga', $data->ukuran_toga ?? '');
+        @endphp
+
         <div class="mb-3">
-            <label class="form-label">Ukuran Toga (jika wisuda) <span class="text-danger">*</span></label>
-            <div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="ukuran_toga" id="xs" value="XS"  />
-                    <label class="form-check-label" for="xs">XS</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="ukuran_toga" id="s" value="S" />
-                    <label class="form-check-label" for="s">S</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="ukuran_toga" id="m" value="M" />
-                    <label class="form-check-label" for="m">M</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="ukuran_toga" id="l" value="L" />
-                    <label class="form-check-label" for="l">L</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="ukuran_toga" id="xl" value="XL" />
-                    <label class="form-check-label" for="xl">XL</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="ukuran_toga" id="xxl" value="XXL" />
-                    <label class="form-check-label" for="xxl">XXL</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="ukuran_toga" id="xxxl" value="XXXL" />
-                    <label class="form-check-label" for="xxxl">XXXL</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="ukuran_toga" id="xxxxl" value="XXXXL" />
-                    <label class="form-check-label" for="xxxxl">XXXXL</label>
-                </div>
-            </div>
+            <label for="ukuran_toga" class="form-label d-block mb-2">Ukuran Toga (jika wisuda) <span class="text-danger">*</span></label>
+            <select name="ukuran_toga" id="ukuran_toga" class="form-select" required>
+                <option value="" disabled {{ $currentUkuranToga == '' ? 'selected' : '' }}>Pilih Ukuran Toga</option>
+                <option value="XS"    {{ $currentUkuranToga == 'XS'    ? 'selected' : '' }}>XS</option>
+                <option value="S"     {{ $currentUkuranToga == 'S'     ? 'selected' : '' }}>S</option>
+                <option value="M"     {{ $currentUkuranToga == 'M'     ? 'selected' : '' }}>M</option>
+                <option value="L"     {{ $currentUkuranToga == 'L'     ? 'selected' : '' }}>L</option>
+                <option value="XL"    {{ $currentUkuranToga == 'XL'    ? 'selected' : '' }}>XL</option>
+                <option value="XXL"   {{ $currentUkuranToga == 'XXL'   ? 'selected' : '' }}>XXL</option>
+                <option value="XXXL"  {{ $currentUkuranToga == 'XXXL'  ? 'selected' : '' }}>XXXL</option>
+                <option value="XXXXL" {{ $currentUkuranToga == 'XXXXL' ? 'selected' : '' }}>XXXXL</option>
+            </select>
         </div>
+
         <div class="mb-3">
             <label class="form-label" for="pembimbing_1">Nama Pembimbing 1</label>
             <input type="text" class="form-control" id="pembimbing_1" name="pembimbing_1" 
@@ -174,33 +134,23 @@ value="{{ $data->nama_pembimbing_1 }}" />
             <input type="text" class="form-control" id="pembimbing_2" name="pembimbing_2" 
 value="{{ $data->nama_pembimbing_2 }}" />
         </div>
+        @php
+            $currentTema = old('tema_skripsi', $data->tema_skripsi ?? '');
+        @endphp
+
         <div class="mb-3">
-            <label class="form-label d-block">Tema Skripsi <span class="text-danger">*</span></label>
-            @php
-                $currentTema = old('tema_skripsi', $data->tema_skripsi ?? '');
-            @endphp
-
-            @foreach (['Applied AI', 'Software Development', 'Game Development', 'Data Analytic', 'Cyber Security', 'IOT'] as $tema)
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="tema_skripsi" 
-                        id="tema_{{ Str::slug($tema, '_') }}" 
-                        value="{{ $tema }}" 
-                        @checked($currentTema == $tema)>
-                    <label class="form-check-label" for="tema_{{ Str::slug($tema, '_') }}">
-                        {{ $tema }}
-                    </label>
-                </div>
-            @endforeach
+            <label for="tema_skripsi" class="form-label d-block mb-2">Tema Skripsi <span class="text-danger">*</span></label>
+            <select name="tema_skripsi" id="tema_skripsi" class="form-select" required>
+                <option value="" disabled {{ $currentTema == '' ? 'selected' : '' }}>Pilih Tema Skripsi</option>
+                <option value="Applied AI"            {{ $currentTema == 'Applied AI' ? 'selected' : '' }}>Applied AI</option>
+                <option value="Software Development"  {{ $currentTema == 'Software Development' ? 'selected' : '' }}>Software Development</option>
+                <option value="Game Development"      {{ $currentTema == 'Game Development' ? 'selected' : '' }}>Game Development</option>
+                <option value="Data Analytic"         {{ $currentTema == 'Data Analytic' ? 'selected' : '' }}>Data Analytic</option>
+                <option value="Cyber Security"        {{ $currentTema == 'Cyber Security' ? 'selected' : '' }}>Cyber Security</option>
+                <option value="IOT"                   {{ $currentTema == 'IOT' ? 'selected' : '' }}>IOT</option>
+            </select>
         </div>
 
-        <!-- Upload File -->
-       <div class="mb-3">
-        <label class="form-label">Naskah</label>
-        @if (!empty($data->naskah))
-            <p><a href="{{ asset($data->naskah) }}" target="_blank">Lihat Naskah</a></p>
-        @endif
-        <input type="file" name="naskah" class="form-control">
-        </div>
 
         {{-- Hasil Plagiasi --}}
         <div class="mb-3">

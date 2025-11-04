@@ -28,62 +28,90 @@ class JadwalSidangTAController extends Controller
     }
 
     public function create()
-        {
-            // Ambil semua mahasiswa yang sudah mendaftar sidang TA berdasarkan user_id
-            $mahasiswaList = User::whereIn('id', function ($query) {
-                $query->select('user_id')->from('data_peserta_ta');
-            })->where('role', 'mahasiswa')->get();
-
-            $dosenList = User::where('role', 'dosen')->get();
-
-            return view('admin.jadwal.jadwalta.create', compact('mahasiswaList', 'dosenList'));
-        }
-
-
-    public function store(Request $request)
     {
-        // Validasi sederhana, misal wajib ada nama dosen
-        $request->validate([
-            'user_id' => 'required|exists:users,id', // id mahasiswa
-            'dosbing1' => 'nullable|string',
-            'dosbing2' => 'nullable|string',
-            'ketua_penguji' => 'nullable|string',
-            'penguji1' => 'nullable|string',
-            'penguji2' => 'nullable|string',
-            // field lain validasi jika perlu
+        // Ambil semua mahasiswa yang sudah punya jadwal TA
+        $mahasiswaSudahAdaJadwal = DB::table('jadwal_ta')->pluck('user_id');
+
+        $mahasiswaList = User::where('role', 'mahasiswa')
+            ->whereIn('nim', function($query) {
+                $query->selectRaw("nim COLLATE utf8mb4_general_ci")
+                    ->from('table_pendaftaran_t_a') // pastikan nama tabel benar
+                    ->where('status_hasil_plagiasi', 'disetujui')
+                    ->where('status_bukti_pembayaran', 'disetujui')
+                    ->where('status_skor_toefl', 'disetujui')
+                    ->where('status_ijazah_sma', 'disetujui')
+                    ->where('status_ktp', 'disetujui')
+                    ->where('status_kk', 'disetujui');
+            })
+            ->whereIn('id', function($query) {
+                $query->select('mahasiswa_id')
+                    ->from('penilaian_dosen_pembimbing')
+                    ->whereNotNull('rata_rata');
+            })
+            ->whereNotIn('id', $mahasiswaSudahAdaJadwal) // ⬅️ filter
+            ->get();
+
+        $dosenList = User::whereIn('role', ['dosen', 'dosen_penilai', 'dosen_pembimbing', 'kaprodi'])->get();
+
+        return view('admin.jadwal.jadwalta.create', compact('mahasiswaList', 'dosenList'));
+    }
+
+
+   public function store(Request $request)
+{
+    // Validasi lengkap
+    // 🔎 Cek bentrok
+    $bentrok = \App\Models\admin\JadwalTAModel::where('tanggal', $request->tanggal)
+        ->where('ruangan', $request->ruangan)
+        ->where(function ($q) use ($request) {
+            $q->whereBetween('waktu', [$request->waktu, $request->selesai])
+              ->orWhereBetween('selesai', [$request->waktu, $request->selesai]);
+        })
+        ->exists();
+
+    if ($bentrok) {
+        return back()->withInput()->withErrors([
+            'ruangan' => 'Jadwal pada ' . $request->tanggal . 
+                        ' jam ' . $request->waktu . '-' . $request->selesai . 
+                        ' di ruangan ' . $request->ruangan . ' sudah terpakai.'
         ]);
+    }
 
-        // Fungsi bantu cari id user berdasarkan username atau nama (username misal)
-        $getUserIdByUsername = function($username) {
-            $user = \App\Models\User::where('username', $username)->first();
-            return $user ? $user->id : null;
-        };
+    // Cari ID dosen
+    $getUserIdByUsername = function ($username) {
+        if (!$username) return null;
+        $user = \App\Models\User::where('username', $username)->first();
+        return $user ? $user->id : null;
+    };
 
-        // Cari ID dosen berdasarkan nama/username yang dikirim
-        $dosbing1_id = $getUserIdByUsername($request->input('dosbing1_id'));
+    $dosbing1_id = $getUserIdByUsername($request->input('dosbing1_id'));
         $dosbing2_id = $getUserIdByUsername($request->input('dosbing2_id'));
         $ketua_penguji_id = $getUserIdByUsername($request->input('ketua_penguji_id'));
         $penguji1_id = $getUserIdByUsername($request->input('penguji1_id'));
         $penguji2_id = $getUserIdByUsername($request->input('penguji2_id'));
+    // Simpan data
+    \App\Models\admin\JadwalTAModel::create([
+        'user_id' => $request->user_id,
+        'nim' => $request->nim,
+        'judul' => $request->judul,
+        'tanggal' => $request->tanggal,
+        'waktu' => $request->waktu,
+        'selesai' => $request->selesai,
+        'ruangan' => $request->ruangan,
+        'dosbing1_id' => $dosbing1_id,
+        'dosbing2_id' => $dosbing2_id,
+        'ketua_penguji_id' => $ketua_penguji_id,
+        'penguji1_id' => $penguji1_id,
+        'penguji2_id' => $penguji2_id,
+    ]);
 
-        // Simpan ke tabel jadwal_ta
-        \App\Models\admin\JadwalTAModel::create([
-            'user_id' => $request->input('user_id'),
-            'nim' => $request->input('nim'),
-            'judul' => $request->input('judul'),
-            'dosbing1_id' => $dosbing1_id,
-            'dosbing2_id' => $dosbing2_id,
-            'ketua_penguji_id' => $ketua_penguji_id,
-            'penguji1_id' => $penguji1_id,
-            'penguji2_id' => $penguji2_id,
-            'tanggal' => $request->input('tanggal'),
-            'waktu' => $request->input('waktu'),
-            'ruangan' => $request->input('ruangan'),
-            'selesai' => $request->input('selesai'),
-        ]);
+    return redirect()->route('admin.jadwalta')
+        ->with('success', 'Jadwal TA berhasil disimpan');
+}
 
-        return redirect()->route('admin.jadwalta')->with('success', 'Jadwal TA berhasil disimpan');
-    }
+
+
+
 
 
     public function edit($id)
@@ -92,7 +120,6 @@ class JadwalSidangTAController extends Controller
         $jadwal = JadwalTAModel::findOrFail($id); // atau model kamu yang sesuai
         $mahasiswaList = DB::table('table_pendaftaran_t_a')
                             ->join('users', DB::raw('CONVERT(table_pendaftaran_t_a.nim USING utf8mb4)'), '=', DB::raw('CONVERT(users.nim USING utf8mb4)'))
-                            ->where('status_naskah', 'disetujui')
                             ->where('status_hasil_plagiasi', 'disetujui')
                             ->where('status_bukti_pembayaran', 'disetujui')
                             ->where('status_skor_toefl', 'disetujui')
@@ -196,3 +223,4 @@ class JadwalSidangTAController extends Controller
         ]);
     }
 }
+    

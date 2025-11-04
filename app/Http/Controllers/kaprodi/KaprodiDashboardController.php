@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\kaprodi;
 
-use App\Http\Controllers\Controller;
+use DB;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Proposal;
-use App\Models\InfoTerbaru;
 
-use Carbon\Carbon;
-use DB;
+use App\Models\InfoTerbaru;
+use App\Models\admin\JadwalTAModel;
+use App\Http\Controllers\Controller;
 
 class KaprodiDashboardController extends Controller
 {
@@ -16,6 +17,11 @@ class KaprodiDashboardController extends Controller
     {
         // Mendapatkan prodi dari user yang sedang login
         $prodiUser = auth()->user()->prodi;
+        $dosenId = auth()->user()->id;
+
+        $jumlahKetuaPenguji = JadwalTAModel::where('ketua_penguji_id', $dosenId)->count();
+        $jumlahPenguji1     = JadwalTAModel::where('penguji1_id', $dosenId)->count();
+        $jumlahPenguji2     = JadwalTAModel::where('penguji2_id', $dosenId)->count();
 
         // Menghitung jumlah pengguna berdasarkan role dan prodi
         $jumlahMahasiswa = User::where('role', 'mahasiswa')
@@ -80,7 +86,10 @@ class KaprodiDashboardController extends Controller
             'jumlahMahasiswaDiampu',
             'tahunAkademik',
             'infoTerbaru',
-            'semester'
+            'semester',
+             'jumlahKetuaPenguji',
+            'jumlahPenguji1',
+            'jumlahPenguji2'
         ));
     }
 }

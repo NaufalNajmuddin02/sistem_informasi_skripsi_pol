@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers\dosen_penilai\penilaian;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\admin\JadwalTAModel;
 use App\Models\PendaftaranSidangTA;
 use App\Models\PenilaianTugasAkhir;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\PenilaianSidangTAHKI;
 use Illuminate\Support\Facades\Auth;
+use App\Models\PenilaianDosenPenilai;
+use App\Models\PenilaianSidangTAIlmiah;
+use App\Models\PenilaianSidangTASkripsi;
 
 class PenilaianTugasAkhirDosenPenilaiController extends Controller
 {   
@@ -299,8 +305,74 @@ class PenilaianTugasAkhirDosenPenilaiController extends Controller
         return view('dosen_penilai.penilaian.index', compact('daftartabel1','daftartabel2','daftartabel3'));
     }
     public function create(){
-        $mahasiswa = PendaftaranSidangTA::select('id', 'nama', 'nim', 'judul_skripsi')->get();
-        return view('dosen_penilai.penilaian.ta',compact('mahasiswa'));
+         $dosenId = Auth::id();
+
+        $ketuaPenguji = JadwalTAModel::with(['user', 'penilaian'])
+            ->select(
+                'jadwal_ta.*',
+
+                // ambil langsung total_ketua biar bisa dipakai di Blade
+                DB::raw('COALESCE(pen.total_ketua,0) as total_ketua'),
+
+                // Dosen pembimbing
+                DB::raw('COALESCE(pdp.total_dosbing1,0) as total_dosbing1'),
+                DB::raw('COALESCE(pdp.total_dosbing2,0) as total_dosbing2'),
+                DB::raw('COALESCE(pdp.total_dosbing1,0)/5 as nilai_dosbing1'),
+                DB::raw('COALESCE(pdp.total_dosbing2,0)/5 as nilai_dosbing2'),
+
+                // rata-rata dosbing * 0.25
+                DB::raw('((COALESCE(pdp.total_dosbing1,0)/5 + COALESCE(pdp.total_dosbing2,0)/5) / 2) * 0.25 as nilai_pembimbing_final'),
+
+                // Dosen penguji
+                DB::raw('COALESCE(pen.total_ketua,0)/5 as nilai_ketua'),
+                DB::raw('COALESCE(pen.total_penguji1,0)/5 as nilai_penguji1'),
+                DB::raw('COALESCE(pen.total_penguji2,0)/5 as nilai_penguji2'),
+
+                // rata-rata penguji * 0.75
+                DB::raw('((COALESCE(pen.total_ketua,0)/5 + COALESCE(pen.total_penguji1,0)/5 + COALESCE(pen.total_penguji2,0)/5) / 3) * 0.75 as nilai_penguji_final'),
+
+                // nilai akhir gabungan
+                DB::raw('
+                    (((COALESCE(pen.total_ketua,0)/5 + COALESCE(pen.total_penguji1,0)/5 + COALESCE(pen.total_penguji2,0)/5) / 3) * 0.75)
+                    +
+                    (((COALESCE(pdp.total_dosbing1,0)/5 + COALESCE(pdp.total_dosbing2,0)/5) / 2) * 0.25)
+                as nilai_akhir')
+            )
+            ->leftJoin('penilaian_dosen_penilai as pen', 'jadwal_ta.user_id', '=', 'pen.mahasiswa_id')
+            ->leftJoin('penilaian_dosen_pembimbing as pdp', 'jadwal_ta.user_id', '=', 'pdp.mahasiswa_id')
+            ->where('jadwal_ta.ketua_penguji_id', $dosenId)
+            ->get();
+
+
+        $penguji1 = JadwalTAModel::with(['user', 'penilaian'])
+            ->select(
+                'jadwal_ta.*',
+                DB::raw('COALESCE(penilaian_dosen_penilai.total_ketua,0) as total_ketua'),
+                DB::raw('COALESCE(penilaian_dosen_penilai.total_penguji1,0) as total_penguji1'),
+                DB::raw('COALESCE(penilaian_dosen_penilai.total_penguji2,0) as total_penguji2'),
+                DB::raw('COALESCE(penilaian_dosen_penilai.total_ketua,0) 
+                    + COALESCE(penilaian_dosen_penilai.total_penguji1,0) 
+                    + COALESCE(penilaian_dosen_penilai.total_penguji2,0) as total_nilai')
+            )
+            ->leftJoin('penilaian_dosen_penilai', 'jadwal_ta.user_id', '=', 'penilaian_dosen_penilai.mahasiswa_id')
+            ->where('jadwal_ta.penguji1_id', $dosenId)
+            ->get();
+
+        $penguji2 = JadwalTAModel::with(['user', 'penilaian'])
+            ->select(
+                'jadwal_ta.*',
+                DB::raw('COALESCE(penilaian_dosen_penilai.total_ketua,0) as total_ketua'),
+                DB::raw('COALESCE(penilaian_dosen_penilai.total_penguji1,0) as total_penguji1'),
+                DB::raw('COALESCE(penilaian_dosen_penilai.total_penguji2,0) as total_penguji2'),
+                DB::raw('COALESCE(penilaian_dosen_penilai.total_ketua,0) 
+                    + COALESCE(penilaian_dosen_penilai.total_penguji1,0) 
+                    + COALESCE(penilaian_dosen_penilai.total_penguji2,0) as total_nilai')
+            )
+            ->leftJoin('penilaian_dosen_penilai', 'jadwal_ta.user_id', '=', 'penilaian_dosen_penilai.mahasiswa_id')
+            ->where('jadwal_ta.penguji2_id', $dosenId)
+            ->get();;
+
+        return view('dosen_penilai.penilaian.ta', compact('ketuaPenguji','penguji1','penguji2'));
     }
     public function createPembimbing(){
           $mahasiswa = PendaftaranSidangTA::select('id', 'nama', 'nim', 'judul_skripsi')->get();
@@ -666,4 +738,69 @@ class PenilaianTugasAkhirDosenPenilaiController extends Controller
         }
         return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
     }
+    public function getKriteria(Request $request)
+    {
+        $jenis = $request->jenis;
+        if($jenis === 'hki'){
+            $data = PenilaianSidangTAHKI::all();
+        } elseif($jenis === 'ilmiah'){
+            $data = PenilaianSidangTAIlmiah::all();
+        } else {
+            $data = PenilaianSidangTASkripsi::all();
+        }
+
+        return response()->json($data);
+    }
+    public function simpan(Request $request)
+    {
+        $request->validate([
+            'mahasiswa_id' => 'required|exists:users,id',
+            'peran_penguji' => 'required|in:1,2,3',
+            'nilai' => 'required|array',
+        ]);
+
+         $penilaian = PenilaianDosenPenilai::firstOrNew([
+        'mahasiswa_id' => $request->mahasiswa_id,
+    ]);
+
+        $total = 0;
+
+        foreach ($request->nilai as $i => $val) {
+            $index = $i + 1;
+            $bobot = $request->bobot[$i] ?? 1; // default 1 kalau tidak ada
+
+            // hasil perhitungan nilai x bobot
+            $hasil = $val * $bobot;
+
+            $kolom = match ($request->peran_penguji) {
+                '1' => "nilai{$index}_ketua",
+                '2' => "nilai{$index}_penguji1",
+                '3' => "nilai{$index}_penguji2",
+            };
+
+            $penilaian->$kolom = $hasil;
+            $total += $hasil;
+        }
+
+        // Simpan total & dosen penguji yang menilai
+        if ($request->peran_penguji == 1) {
+            $penilaian->total_ketua = $total;
+            $penilaian->ketua_penguji_id = auth()->id();
+
+            if ($request->filled('status_kelulusan')) {
+                $penilaian->status = $request->status_kelulusan;
+            }
+        } elseif ($request->peran_penguji == 2) {
+            $penilaian->total_penguji1 = $total;
+            $penilaian->penguji1_id = auth()->id();
+        } else {
+            $penilaian->total_penguji2 = $total;
+            $penilaian->penguji2_id = auth()->id();
+        }
+
+        $penilaian->save();
+
+        return back()->with('success', 'Nilai berhasil disimpan.');
+    }
+
 }

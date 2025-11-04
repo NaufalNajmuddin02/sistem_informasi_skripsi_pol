@@ -124,6 +124,15 @@
                         </div>
                     </div>
                 </div>
+                <!-- Statistik Ujian TA (Diagram Batang) -->
+                <div class="card mt-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Statistik Ujian TA</h5>
+                        <canvas id="statistikPengujiChart" height="150"></canvas>
+                    </div>
+                </div>
+
+
 
             </div>
         </div>
@@ -133,5 +142,47 @@
     <!-- Bootstrap and Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('statistikPengujiChart').getContext('2d');
+    const statistikPengujiChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Ketua Penguji', 'Penguji 1', 'Penguji 2'],
+            datasets: [{
+                label: 'Jumlah Ujian TA',
+                data: [
+                    {{ $totalKetuaPenguji }},
+                    {{ $totalPenguji1 }},
+                    {{ $totalPenguji2 }}
+                ],
+                backgroundColor: ['#0d6efd', '#198754', '#ffc107'], // biru, hijau, kuning
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Jumlah Peran Dosen sebagai Penguji',
+                    font: { size: 16 }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0 // biar gak ada angka desimal
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+
 </body>
 </html>

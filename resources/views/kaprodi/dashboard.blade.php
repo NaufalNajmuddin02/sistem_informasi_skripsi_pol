@@ -115,6 +115,15 @@
                     </div>
                 </div>
 
+
+                <!-- Grafik Mahasiswa yang Diuji -->
+                <div class="card mt-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-3">Jumlah Mahasiswa yang Diuji</h5>
+                        <canvas id="pengujiChart"></canvas>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -253,6 +262,42 @@
             }
         }
     });
+
+    // Grafik Mahasiswa yang Diuji
+const pengujiChartCtx = document.getElementById('pengujiChart').getContext('2d');
+const pengujiChart = new Chart(pengujiChartCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Ketua Penguji', 'Penguji 1', 'Penguji 2'],
+        datasets: [{
+            label: 'Jumlah Mahasiswa',
+            data: [
+                {{ $jumlahKetuaPenguji }},
+                {{ $jumlahPenguji1 }},
+                {{ $jumlahPenguji2 }}
+            ],
+            backgroundColor: [
+                '#36A2EB',
+                '#FF6384',
+                '#FFCE56'
+            ],
+            borderColor: '#fff',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision:0
+                }
+            }
+        }
+    }
+});
+
 </script>
 </body>
 </html>

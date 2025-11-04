@@ -16,13 +16,14 @@ class PendaftaranTAController extends Controller
     public function index()
     {
         $mahasiswa = Auth::user();
+        $data = PendaftaranSidangTA::where('nim', $mahasiswa->nim)->first();
 
         $seminar = Seminar::where('user_id', $mahasiswa->id)->first();
 
         // Ambil semua dosen (kalau tetap ingin pakai <select>)
         $dosenList = User::where('role', 'dosen')->get();
 
-        return view('mahasiswa.pendaftaranta.index', compact('seminar', 'dosenList'));
+        return view('mahasiswa.pendaftaranta.index', compact('seminar', 'dosenList','data'));
     }
    public function store(Request $request)
     {
@@ -44,7 +45,6 @@ class PendaftaranTAController extends Controller
             'pembimbing_1' => 'nullable|string',
             'pembimbing_2' => 'nullable|string',
             'tema_skripsi' => 'required|string',
-            'naskah' => 'required|file|mimes:pdf|max:2048',
             'hasil_plagiasi' => 'required|file|mimes:pdf|max:2048',
             'bukti_pembayaran' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'skor_toefl' => 'required|file|mimes:pdf|max:2048',
@@ -55,7 +55,6 @@ class PendaftaranTAController extends Controller
         ]);
 
         $fileFields = [
-            'naskah',
             'hasil_plagiasi',
             'bukti_pembayaran',
             'skor_toefl',
@@ -125,7 +124,6 @@ class PendaftaranTAController extends Controller
             'pembimbing_1' => 'nullable|string',
             'pembimbing_2' => 'nullable|string',
             'tema_skripsi' => 'required|string',
-            'naskah' => 'sometimes|file|mimes:pdf|max:2048',
             'hasil_plagiasi' => 'sometimes|file|mimes:pdf|max:2048',
             'bukti_pembayaran' => 'sometimes|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'skor_toefl' => 'sometimes|file|mimes:pdf|max:2048',
@@ -136,7 +134,6 @@ class PendaftaranTAController extends Controller
         ]);
 
         $fileFields = [
-            'naskah',
             'hasil_plagiasi',
             'bukti_pembayaran',
             'skor_toefl',

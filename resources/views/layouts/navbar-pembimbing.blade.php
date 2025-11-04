@@ -137,25 +137,25 @@ body {
                             Penilaian
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('dosen-pembimbing.penilaianpembimbing') }}">Bimbingan</a></li>
-                            <li><a class="dropdown-item" href="{{ route('dosen-pembimbing.penilaian') }}">Penguji</a></li>
+                            <li><a class="dropdown-item" href="{{ route('penilaian.index') }}">Bimbingan</a></li>
+                            <!-- <li><a class="dropdown-item" href="{{ route('dosen-pembimbing.penilaian') }}">Penguji</a></li>
                             <li><a class="dropdown-item" href="{{ route('dosen-pembimbing.daftarpenilaian') }}">Daftar Penilaian Penguji</a></li>
-                            <li><a class="dropdown-item" href="{{ route('dosen-pembimbing.daftarpenilaianpembimbing') }}">Daftar Penilaian Pembimbing</a></li>
+                            <li><a class="dropdown-item" href="{{ route('dosen-pembimbing.daftarpenilaianpembimbing') }}">Daftar Penilaian Pembimbing</a></li> -->
                             
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
+                    <!-- <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             Validasi Skripsi
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{  route('dosen.validasi.index') }}">Pembimbing 1</a></li>
                             <li><a class="dropdown-item" href="{{ route('dosen.validasi.dospem2.index') }}">Pembimbing 2</a></li>
-                            <!-- <li><a class="dropdown-item" href="{{ route('dosen-pembimbing.validasi.index') }}">Validasi Skripsi</a></li> -->
+                            <li><a class="dropdown-item" href="{{ route('dosen-pembimbing.validasi.index') }}">Validasi Skripsi</a></li>
                            
                             
                         </ul>
-                    </li>
+                    </li> -->
                 </ul>
                 <div class="d-flex align-items-center">
                     <a href="{{ route('notifikasi.index') }}" class="text-white me-3 notification-icon">🔔

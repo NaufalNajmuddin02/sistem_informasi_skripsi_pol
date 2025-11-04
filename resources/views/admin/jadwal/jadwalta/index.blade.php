@@ -14,10 +14,16 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="card-title mb-0">Jadwal Peserta Sidang TA</h2>
-                <a href="{{ route('admin.jadwalta.create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Tambah Jadwal Sidang
-                </a>
+                
             </div>
+
+                <div class="d-flex justify-content-between mb-3">
+    <input type="text" id="searchInput" class="form-control w-50" placeholder="Cari nama mahasiswa...">
+    <a href="{{ route('admin.jadwalta.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Tambah Jadwal Sidang
+    </a>
+</div>
+
             @if(session('success'))
                 <div class="alert alert-success">
                     <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
@@ -73,7 +79,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center">Belum ada peserta.</td>
+                            <td colspan="14" class="text-center">Belum ada peserta.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -100,5 +106,21 @@
             })
         })();
     </script>
+
+    <script>
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll('table tbody tr');
+
+    rows.forEach(row => {
+        let namaCell = row.querySelector('td:nth-child(2)'); // kolom Nama Mahasiswa
+        if (namaCell) {
+            let nama = namaCell.textContent.toLowerCase();
+            row.style.display = nama.includes(filter) ? '' : 'none';
+        }
+    });
+});
+</script>
+
 </body>
 </html>

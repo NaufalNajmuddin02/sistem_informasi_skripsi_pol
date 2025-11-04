@@ -20,7 +20,7 @@
             @php
                 $tanggal = $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') : '-';
                 $jam = $item->waktu ? \Carbon\Carbon::parse($item->waktu)->format('H:i') : '-';
-                $jam = $item->selesai ? \Carbon\Carbon::parse($item->selesai)->format('H:i') : '-';
+                $selesai = $item->selesai ? \Carbon\Carbon::parse($item->selesai)->format('H:i') : '-';
             @endphp
 
             <div class="card shadow-sm mb-4">

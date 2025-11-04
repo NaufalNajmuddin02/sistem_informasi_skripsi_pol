@@ -165,6 +165,11 @@ body {
                             <li><a class="dropdown-item" href="{{ route('admin.datapesertata') }}">Data Peserta TA</a></li>
                             <li><a class="dropdown-item" href="{{ route('admin.jadwalta') }}">Jadwal Sidang TA</a></li>
                             <li><a class="dropdown-item" href="{{ route('admin.daftarnilaita') }}">Daftar Nilai TA</a></li>
+                            <li><a class="dropdown-item" href="{{ route('penilaian.hki.index') }}">Aspek Penilaian TA</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.rekomendasi.data') }}">Data Rekomendasi Sidang</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.test.data') }}">Data Nama Pendaftar Sidang Tugas Akhir</a></li>
+                             <li><a class="dropdown-item" href="{{ route('sidangta.kelulusan') }}">Data Nama Lulus Sidang</a></li>
+                    
                         </ul>
                     </li>
                      <li class="nav-item dropdown">

@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\kaprodi\datapesertata;
 
-use App\Http\Controllers\Controller;
-use App\Models\kaprodi\DataPesertaTAModel;
-use App\Models\PendaftaranSidangTA;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\PendaftaranSidangTA;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use App\Models\kaprodi\DataPesertaTAModel;
 
 class PesertaSidangTAController extends Controller
 {
@@ -85,14 +86,26 @@ class PesertaSidangTAController extends Controller
     }
     public function create()
     {
-        // Dengan eager loading relasi user
-        $mahasiswaList = PendaftaranSidangTA::with('user')->get();
+        // Ambil daftar nim mahasiswa yang sudah ada di data_peserta_ta
+        $pesertaNim = DB::table('data_peserta_ta')->pluck('nim')->toArray();
 
+        // Ambil mahasiswa yang belum ada di data_peserta_ta
+        $mahasiswaList = DB::table('table_pendaftaran_t_a as p')
+            ->join('users as u', function($join) {
+                $join->on(DB::raw('p.nim COLLATE utf8mb4_unicode_ci'), '=', DB::raw('u.nim COLLATE utf8mb4_unicode_ci'))
+                    ->where('u.role', 'mahasiswa');
+            })
+            ->join('penilaian_dosen_pembimbing as pdp', 'u.id', '=', 'pdp.mahasiswa_id')
+            ->whereNotNull('pdp.rata_rata')
+            ->whereNotIn('p.nim', $pesertaNim) // exclude mahasiswa yang sudah ada
+            ->select('p.*', 'u.username', 'u.nim as user_nim')
+            ->get();
 
-        $dosenList = User::whereIn('role', ['dosen', 'dosen_penguji_ta', 'kaprodi'])->get();
+        $dosenList = User::whereIn('role', ['dosen', 'dosen_penguji_ta', 'kaprodi','dosen_pembimbing','dosen_penilai'])->get();
 
         return view('kaprodi.datapesertasidangta.create', compact('mahasiswaList', 'dosenList'));
     }
+
 
     public function edit($id)
     {
@@ -158,7 +171,7 @@ class PesertaSidangTAController extends Controller
 
         return response()->json([
             'nim' => $data->nim,
-            'judul' => $data->tema_skripsi,
+            'judul' => $data->judul_skripsi,
             // field lain jika perlu
         ]);
     }
@@ -173,7 +186,7 @@ class PesertaSidangTAController extends Controller
 
         return response()->json([
             'nim' => $pendaftaran->nim,
-            'judul' => $pendaftaran->tema_skripsi,
+            'judul' => $pendaftaran->judul_skripsi,
             'nama_pembimbing_1' => $pendaftaran->nama_pembimbing_1,  
             'nama_pembimbing_2' => $pendaftaran->nama_pembimbing_2,
             'penguji2' => $pendaftaran->nama_pembimbing_2,   

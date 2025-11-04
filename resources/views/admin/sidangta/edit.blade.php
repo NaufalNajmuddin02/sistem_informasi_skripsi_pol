@@ -10,7 +10,7 @@
     @include('layouts.navbar-admin')
 
     <div class="container mt-5">
-        <h1>Edit Data Pendaftar Sidang TA</h1>
+        <h1>Verfikasi Data Pendaftar Sidang TA</h1>
         <hr>
         <form action="{{ route('admin.sidangta.update', $pendaftar->id) }}" method="POST">
             @csrf
@@ -127,28 +127,6 @@
                 </div>
                 <div class="col-md-6">
                     <input type="text" name="tema_skripsi" class="form-control" value="{{ $pendaftar->tema_skripsi }}">
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-6 d-flex align-items-center">
-                        <label class="form-label mb-0">Naskah</label>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center">
-                            <select name="status_naskah" class="form-control me-2">
-                                <option value="disetujui" {{ $pendaftar->status_naskah == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                                <option value="belum disetujui" {{ $pendaftar->status_naskah == 'belum disetujui' ? 'selected' : '' }}>Belum Disetujui</option>
-                            </select>
-
-                            @if ($pendaftar->naskah)
-                                @if ($pendaftar->naskah)
-                                <a href="{{ asset($pendaftar->naskah) }}" target="_blank" class="btn btn-outline-secondary" title="Lihat File Naskah">
-                                    <i class="fas fa-file-pdf fa-lg text-danger"></i>
-                                </a>
-                            @endif
-                            @endif
-                        </div>
-                    </div>
                 </div>
                 <br>
                 <div class="row g-3">

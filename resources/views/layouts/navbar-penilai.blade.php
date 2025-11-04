@@ -139,10 +139,10 @@ body {
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('dosen-penilai.penilaiantapenguji') }}">Penguji</a></li>
-                            <li><a class="dropdown-item" href="{{ route('dosen-penilai.penilaiantapembimbing') }}">Pembimbing</a></li>
+                            <!-- <li><a class="dropdown-item" href="{{ route('dosen-penilai.penilaiantapembimbing') }}">Pembimbing</a></li>
                             <li><a class="dropdown-item" href="{{ route('dosen-penilai.daftarpenilaian') }}">Daftar Penilaian Penguji</a></li>
                             <li><a class="dropdown-item" href="{{ route('dosen-penilai.daftarpenilaianpembimbing') }}">Daftar Penilaian Pembimbing</a></li>
-                            <li><a class="dropdown-item" href="{{ route('dosen-penilai.validasi.index') }}">Validasi  Skiripsi</a></li>
+                            <li><a class="dropdown-item" href="{{ route('dosen-penilai.validasi.index') }}">Validasi  Skiripsi</a></li> -->
                         </ul>   
                     </li>
                     

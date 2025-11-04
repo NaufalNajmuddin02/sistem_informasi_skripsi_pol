@@ -47,6 +47,28 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Pendaftaran Ujian TA -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-3">Statistik Pendaftaran Ujian TA</h5>
+                        <div class="d-flex justify-content-center">
+                            <canvas id="pendaftaranChart" style="max-width: 400px; max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistik Kelulusan Sidang -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-3">Statistik Kelulusan Sidang</h5>
+                        <div class="d-flex justify-content-center">
+                            <canvas id="kelulusanChart" style="max-width: 500px; max-height: 350px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+
                 <!-- Info Box Carousel -->
                 <div class="card mt-4 shadow-sm">
                     <div class="card-body">
@@ -107,6 +129,20 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Statistik Rekomendasi Sidang -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-3">Statistik Rekomendasi Sidang</h5>
+                        <div class="d-flex justify-content-center">
+                            <canvas id="rekomendasiChart" style="max-width: 400px; max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                
+              
+
             </div>
         </div>
     </div>
@@ -114,6 +150,8 @@
     @include('layouts.footer')
 
     <!-- Bootstrap and Popper.js -->
+
+    
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <!-- Load Chart.js -->
@@ -257,5 +295,119 @@
             }
         });
     </script>
+
+    <script>
+        // Statistik Rekomendasi Sidang
+        const rekomendasiCtx = document.getElementById('rekomendasiChart').getContext('2d');
+        new Chart(rekomendasiCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Sudah Direkomendasikan', 'Belum Direkomendasikan'],
+                datasets: [{
+                    data: [{{ $jumlahDirekomendasikan }}, {{ $jumlahBelum }}],
+                    backgroundColor: ['#4BC0C0', '#FF6384'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 14 } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Rekomendasi Sidang Mahasiswa',
+                        font: { size: 18, weight: 'bold' }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+
+    </script>
+ <script>
+    const pendaftaranCtx = document.getElementById('pendaftaranChart').getContext('2d');
+    new Chart(pendaftaranCtx, {
+        type: 'bar', // ubah dari pie → bar
+        data: {
+            labels: ['Sudah Mendaftar', 'Belum Mendaftar'],
+            datasets: [{
+                label: 'Jumlah Mahasiswa',
+                data: [{{ $sudahDaftar }}, {{ $belumDaftar }}],
+                backgroundColor: ['#4BC0C0', '#FF6384'],
+                borderColor: ['#36A2EB', '#FF6384'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false // karena cuma 1 dataset
+                },
+                title: {
+                    display: true,
+                    text: 'Rekap Pendaftaran Ujian TA',
+                    font: { size: 18, weight: 'bold' }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 } // biar naik per 1
+                }
+            },
+            animation: {
+                duration: 800,
+                easing: 'easeOutBounce'
+            }
+        }
+    });
+    const kelulusanCtx = document.getElementById('kelulusanChart').getContext('2d');
+    new Chart(kelulusanCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Lulus', 'Belum Lulus'],
+            datasets: [{
+                label: 'Jumlah Mahasiswa',
+                data: [{{ $lulus }}, {{ $belumLulus }}],
+                backgroundColor: ['#4BC0C0', '#FF6384'],
+                borderColor: ['#36A2EB', '#FF6384'],
+                borderWidth: 1,
+                borderRadius: 6 // sudut batang agak bulat biar modern
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Statistik Kelulusan Sidang',
+                    font: { size: 18, weight: 'bold' }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 } // biar angkanya naik 1,2,3 dst.
+                }
+            },
+            animation: {
+                duration: 1200,
+                easing: 'easeOutBounce'
+            }
+        }
+    });
+
+</script>
+
+
 </body>
 </html>

@@ -173,22 +173,22 @@ body {
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{route('kaprodi.penilaianta')}}">Penguji</a></li>
                             <li><a class="dropdown-item" href="{{ route('kaprodi.penilaianbimbingan') }}">Pembimbing</a></li>
-                            <li><a class="dropdown-item" href="{{ route('kaprodi.daftarpenilaian') }}">Daftar Penilaian Penguji</a></li>
-                            <li><a class="dropdown-item" href="{{ route('kaprodi.daftarnilaipembimbing') }}">Daftar Penilaian Pembimbing</a></li>
+                            <!-- <li><a class="dropdown-item" href="{{ route('kaprodi.daftarpenilaian') }}">Daftar Penilaian Penguji</a></li>
+                            <li><a class="dropdown-item" href="{{ route('kaprodi.daftarnilaipembimbing') }}">Daftar Penilaian Pembimbing</a></li> -->
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
+                    <!-- <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             Validasi Skripsi
                         </a>
                         <ul class="dropdown-menu">
-                            <!-- <li><a class="dropdown-item" href="{{  route('kaprodi.validasi.index') }}">Pembimbing 1</a></li>
-                            <li><a class="dropdown-item" href="{{ route('kaprodi.validasi.pembimbing2') }}">Pembimbing 2</a></li> -->
+                            <li><a class="dropdown-item" href="{{  route('kaprodi.validasi.index') }}">Pembimbing 1</a></li>
+                            <li><a class="dropdown-item" href="{{ route('kaprodi.validasi.pembimbing2') }}">Pembimbing 2</a></li>
                             <li><a class="dropdown-item" href="{{ route('kaprodi.validasi.index') }}">Validasi Skripsi</a></li>
                             
                             
                         </ul>
-                    </li>
+                    </li> -->
                 </ul>
                 <div class="d-flex align-items-center">
                     <a href="{{ route('notifikasi.index') }}" class="text-white me-3 notification-icon">🔔

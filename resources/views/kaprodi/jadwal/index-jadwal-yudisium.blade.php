@@ -37,7 +37,7 @@
                     <td>{{ \Carbon\Carbon::parse($item->waktu_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($item->waktu_selesai)->format('H:i') }}</td>
                     <td>{{ $item->ruangan }}</td>
                     <td>{{ $item->keterangan ?? '-' }}</td>
-                    <td>{{ $item->creator->name ?? '-' }}</td>
+                    <td>{{ $item->creator->username ?? '-' }}</td>
                    <td>
                         <a href="{{ route('yudisium.edit', $item->id) }}" class="btn btn-warning btn-sm">
                             <i class="bi bi-pencil-square"></i> Edit

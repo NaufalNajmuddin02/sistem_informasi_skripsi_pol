@@ -3,8 +3,8 @@
 namespace App\Models\admin;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class JadwalTAModel extends Model
 {
@@ -20,6 +20,7 @@ class JadwalTAModel extends Model
         'penguji1_id',
         'penguji2_id',
         'waktu',
+        'selesai',
         'tanggal',
         'ruangan',
     ];
@@ -52,5 +53,9 @@ class JadwalTAModel extends Model
     public function penguji2()
     {
         return $this->belongsTo(User::class, 'penguji2_id');
+    }
+    public function penilaian()
+    {
+        return $this->hasOne(\App\Models\PenilaianDosenPenilai::class, 'mahasiswa_id', 'user_id');
     }
 }

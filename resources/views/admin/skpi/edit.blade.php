@@ -10,89 +10,118 @@
 
 @include('layouts.navbar-admin')
 
-    <div class="container mt-4">
-        <!-- <h2>Daftar SKPI</h2> -->
-        <div class="container mt-4">
+<div class="container mt-4">
     <h2>Edit Penilaian SKPI</h2>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <form action="{{ route('admin.skpi.update', $skpi->id) }}"
-        method="POST">
+    <form action="{{ route('admin.skpi.update', $skpi->id) }}" method="POST">
         @csrf
         @method('PUT')
 
+        <!-- Identitas Mahasiswa -->
         <div class="mb-3">
-            <label for="waktu" class="form-label">Nama Mahasiswa : </label>
-            <input type="text" class="form-control" id="waktu" name="name" value="{{ $skpi->user->username ?? $skpi->user->name ?? '-' }}" required readonly>
-        <div class="invalid-feedback">Silakan masukkan waktu sidang.</div>
-        <div class="mb-3">
-            <label for="waktu" class="form-label">NIM Mahasiswa : </label>
-            <input type="text" class="form-control" id="waktu" name="name" value="{{ $skpi->user->nim ?? $skpi->user->nim ?? '-' }}" required readonly>
-        <div class="invalid-feedback">Silakan masukkan waktu sidang.</div>
+            <label class="form-label">Nama Mahasiswa</label>
+            <input type="text" class="form-control" value="{{ $skpi->user->username ?? '-' }}" readonly>
         </div>
-        <div class="row">
-            @for ($i = 1; $i <= 10; $i++)
-                @php
-                    $fileCol  = "sertifikat$i";
-                    $nilaiCol = "nilai_sertifikat$i";
-                    $filePath = $skpi->$fileCol;
-                @endphp
-
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Sertifikat {{ $i }}</h5>
-
-                            @if($filePath)
-                                <p>
-                                    <a href="{{ asset('storage/'.$filePath) }}"
-                                       target="_blank" class="btn btn-sm btn-outline-primary">
-                                        Lihat / Unduh
-                                    </a>
-                                </p>
-                            @else
-                                <p class="text-muted fst-italic">Belum di-upload</p>
-                            @endif
-
-                            <div class="mb-2">
-                                <label class="form-label">
-                                    Nilai (0-15)
-                                </label>
-                                <input type="number"
-                                       name="nilai_sertifikat{{ $i }}"
-                                       class="form-control @error("nilai_sertifikat$i") is-invalid @enderror"
-                                       value="{{ old("nilai_sertifikat$i", $skpi->$nilaiCol) }}"
-                                       min="0" max="100" step="1">
-                                @error("nilai_sertifikat$i")
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endfor
+        <div class="mb-3">
+            <label class="form-label">NIM</label>
+            <input type="text" class="form-control" value="{{ $skpi->user->nim ?? '-' }}" readonly>
         </div>
 
-        <div class="d-flex justify-content-end mb-3">
-            <a href="{{ route('admin.skpi.index') }}" class="btn btn-secondary me-2">
-                Kembali
-            </a>
-            <button type="submit" class="btn btn-primary">
-                Simpan Nilai
-            </button>
+        <!-- ================== 1–5 ================== -->
+        <h4 class="mt-4">AKTIFITAS BIDANG PENALARAN DAN KEILMUAN</h4>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Nama Sertifikat</th>
+                    <th>File SKPI</th>
+                    <th>Nilai (1–20)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @include('admin.skpi.skpi-row', ['i' => 1, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 2, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 3, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 4, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 5, 'skpi' => $skpi])
+            </tbody>
+        </table>
+
+        <!-- ================== 6–10 ================== -->
+        <h4 class="mt-4">AKTIFITAS BIDANG MINAT-BAKAT DAN KEGEMARAN</h4>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Nama Sertifikat</th>
+                    <th>File SKPI</th>
+                    <th>Nilai (1–20)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @include('admin.skpi.skpi-row', ['i' => 6, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 7, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 8, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 9, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 10, 'skpi' => $skpi])
+            </tbody>
+        </table>
+
+        <!-- ================== 11–15 ================== -->
+        <h4 class="mt-4">AKTIFITAS BIDANG KEPEMIMPINAN DAN ORGANISASI</h4>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Nama Sertifikat</th>
+                    <th>File SKPI</th>
+                    <th>Nilai (1–20)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @include('admin.skpi.skpi-row', ['i' => 11, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 12, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 13, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 14, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 15, 'skpi' => $skpi])
+            </tbody>
+        </table>
+
+        <!-- ================== 16–20 ================== -->
+        <h4 class="mt-4">AKTIFITAS LAIN-LAIN</h4>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Nama Sertifikat</th>
+                    <th>File SKPI</th>
+                    <th>Nilai (1–20)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @include('admin.skpi.skpi-row', ['i' => 16, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 17, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 18, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 19, 'skpi' => $skpi])
+                @include('admin.skpi.skpi-row', ['i' => 20, 'skpi' => $skpi])
+            </tbody>
+        </table>
+
+        <!-- ================== Narasi ================== -->
+        <div class="mb-4">
+            <label class="form-label">Narasi</label>
+            <textarea name="narasi" class="form-control" rows="4">{{ old('narasi', $skpi->narasi ?? '') }}</textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-end mb-4">
+            <a href="{{ route('admin.skpi.index') }}" class="btn btn-secondary me-2">Kembali</a>
+            <button type="submit" class="btn btn-primary">Simpan Nilai</button>
         </div>
     </form>
 </div>
-</div>
-        
 
 @include('layouts.footer')
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-@include('layouts.footer')
 </body>
 </html>

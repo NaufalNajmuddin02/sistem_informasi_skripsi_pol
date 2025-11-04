@@ -57,4 +57,13 @@ class PendaftaranSidangTA extends Model
     {
         return $this->hasOne(PendaftaranSidangTA::class, 'nim', 'nim');
     }
+    public function penilaian()
+    {
+        return $this->hasOne(PenilaianDosenPembimbing::class, 'mahasiswa_id', 'id');
+    }
+    public function mahasiswa()
+    {
+        return $this->belongsTo(User::class, 'mahasiswa_id');
+    }
+    
 }

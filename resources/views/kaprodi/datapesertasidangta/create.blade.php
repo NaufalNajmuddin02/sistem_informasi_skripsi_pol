@@ -29,11 +29,13 @@
         <select class="form-select" id="pilih_mahasiswa">
             <option value="">-- Pilih Mahasiswa --</option>
             @foreach ($mahasiswaList as $pendaftaran)
-                <option value="{{ $pendaftaran->nim }}">
-                    {{ $pendaftaran->nim }} - {{ $pendaftaran->user->username ?? 'Tidak ada nama' }}
+                <option value="{{ $pendaftaran->user_nim }}">
+                    {{ $pendaftaran->user_nim }} - {{ $pendaftaran->username }}
                 </option>
             @endforeach
         </select>
+
+
     </div>
 
 

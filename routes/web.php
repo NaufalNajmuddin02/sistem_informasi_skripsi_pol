@@ -4,84 +4,95 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NotificationController;
 
-use App\Http\Controllers\dosen\DosenDashboardController;
-use App\Http\Controllers\dosen\jadwal\JadwalBimbinganDosenController;
-use App\Http\Controllers\dosen\jadwal\ListJadwalController;
-use App\Http\Controllers\dosen\Management\ProposalManagementController;
+use App\Http\Controllers\admin\RuanganController;
+use App\Http\Controllers\perpus\PerpusController;
+use App\Http\Controllers\Admin\BatasWaktuController;
+use App\Http\Controllers\admin\InfoTerbaruController;
 // use App\Http\Controllers\dosen\management\CommentController;
 
-use App\Http\Controllers\mahasiswa\MahasiswaDashboardController;
+use App\Http\Controllers\admin\role\UserRoleController;
+use App\Http\Controllers\kaprodi\mapel\MapelController;
+use App\Http\Controllers\admin\AdminDashboardController;
+use App\Http\Controllers\admin\skpi\SKPIAdminController;
+use App\Http\Controllers\dosen\DosenDashboardController;
+use App\Http\Controllers\kaprodi\RekapSeminarController;
+use App\Http\Controllers\kaprodi\seminar\DosenController;
+use App\Http\Controllers\kaprodi\RekapBimbinganController;
+use App\Http\Controllers\Admin\RekapSeminarAdminController;
+
+use App\Http\Controllers\dosen\jadwal\ListJadwalController;
+use App\Http\Controllers\kaprodi\JadwalTAKaprodiController;
+use App\Http\Controllers\dosen\management\CommentController;
+use App\Http\Controllers\kaprodi\KaprodiDashboardController;
+use App\Http\Controllers\kaprodi\KategoriProposalController;
+use App\Http\Controllers\admin\RekapBimbinganAdminController;
+use App\Http\Controllers\admin\role\UserManagementController;
+use App\Http\Controllers\admin\sidangta\PenilaianTAControler;
 use App\Http\Controllers\mahasiswa\skripsi\SeminarController;
-use App\Http\Controllers\mahasiswa\bimbingan\BimbinganMahasiswaController;
+use App\Http\Controllers\admin\jadwal\YudisiumAdminController;
 use App\Http\Controllers\mahasiswa\skripsi\ProposalController;
-use App\Http\Controllers\mahasiswa\jadwal\JadwalBimbinganController;
+use App\Http\Controllers\admin\Skripsi\AdminValidasiController;
+
+use App\Http\Controllers\mahasiswa\JadwalTAMahasiswaController;
+use App\Http\Controllers\mahasiswa\surat\RekomendasiController;
+use App\Http\Controllers\admin\sidangta\DataPesertaTAController;
+use App\Http\Controllers\kaprodi\mapel\CommentKaprodiController;
+use App\Http\Controllers\mahasiswa\MahasiswaDashboardController;
+use App\Http\Controllers\admin\sidangta\JadwalSidangTAController;
+use App\Http\Controllers\kaprodi\dosen_penilai\PenilaiController;
+use App\Http\Controllers\kaprodi\JadwalYudisiumKaprodiController;
+use App\Http\Controllers\kaprodi\mapel\ProposalKaprodiController;
+use App\Http\Controllers\mahasiswa\skpi\SKPIMahasiswaController_;
 use App\Http\Controllers\mahasiswa\jadwal\JadwalSeminarController;
 use App\Http\Controllers\mahasiswa\jadwal\JadwalYudisiumController;
-use App\Http\Controllers\mahasiswa\skripsi\PengumpulanBerkasAkhirController;
-use App\Http\Controllers\mahasiswa\surat\RekomendasiController;
-
-use App\Http\Controllers\kaprodi\KaprodiDashboardController;
-use App\Http\Controllers\kaprodi\mapel\MapelController;
-use App\Http\Controllers\kaprodi\mapel\ProposalKaprodiController;
-use App\Http\Controllers\kaprodi\mapel\CommentKaprodiController;
-use App\Http\Controllers\kaprodi\seminar\DosenController;
-use App\Http\Controllers\kaprodi\dosen_penilai\PenilaiController;
-use App\Http\Controllers\kaprodi\seminar\nilai\NilaiSeminarController;
-use App\Http\Controllers\kaprodi\seminar\jadwal\JadwalSeminarKaprodiController;
-use App\Http\Controllers\kaprodi\bimbingan\BimbinganKaprodiController;
-use App\Http\Controllers\kaprodi\rekomendasi\KaprodiRekomendasiController;
-use App\Http\Controllers\kaprodi\RekapBimbinganController;
-use App\Http\Controllers\kaprodi\KategoriProposalController;
-
-use App\Http\Controllers\admin\AdminDashboardController;
-use App\Http\Controllers\admin\dosen_mapel\PembagianMahasiswaController;
-use App\Http\Controllers\admin\dosen_penilai\PembagianRuanganPenilaiController;
-use App\Http\Controllers\admin\InfoTerbaruController;
-use App\Http\Controllers\admin\role\UserRoleController;
-use App\Http\Controllers\admin\role\UserManagementController;
-use App\Http\Controllers\admin\sidangta\DataPesertaTAController;
-use App\Http\Controllers\admin\sidangta\JadwalSidangTAController;
+use App\Http\Controllers\mahasiswa\jadwal\JadwalBimbinganController;
+use App\Http\Controllers\dosen\jadwal\JadwalBimbinganDosenController;
 use App\Http\Controllers\admin\sidangta\PendaftaranSidangTAController;
-use App\Http\Controllers\admin\sidangta\PenilaianTAControler;
-use App\Http\Controllers\admin\skpi\SKPIAdminController;
-use App\Http\Controllers\admin\jadwal\YudisiumAdminController;
-use App\Http\Controllers\admin\Skripsi\AdminValidasiController;
-use App\Http\Controllers\Admin\BatasWaktuController;
-use App\Http\Controllers\Admin\RekapSeminarAdminController;
-use App\Http\Controllers\admin\RekapBimbinganAdminController;
-use App\Http\Controllers\admin\RuanganController;
+use App\Http\Controllers\dosen_penilai\jadwal\JadwalPenilaiController;
+use App\Http\Controllers\dosen_penilai\JadwalTADosenPenilaiController;
 
 // use App\Http\Controllers\dosen\JadwalTADosenController;
+use App\Http\Controllers\kaprodi\bimbingan\BimbinganKaprodiController;
+use App\Http\Controllers\kaprodi\seminar\nilai\NilaiSeminarController;
+use App\Http\Controllers\dosen\Management\ProposalManagementController;
 use App\Http\Controllers\dosen_penilai\DosenPenilaiDashboardController;
-use App\Http\Controllers\dosen_penilai\jadwal\JadwalPenilaiController;
-use App\Http\Controllers\dosen_penilai\seminar\PenilaianSeminarController;
-use App\Http\Controllers\dosen_penilai\JadwalTADosenPenilaiController;
-use App\Http\Controllers\dosen_penilai\penilaian\PenilaianTugasAkhirDosenPenilaiController;
-use App\Http\Controllers\dosen_penilai\validasi_skripsi\ValidasiPengujiController;
+use App\Http\Controllers\admin\dosen_mapel\PembagianMahasiswaController;
+use App\Http\Controllers\dosen_pembimbing\bimbingan\BimbinganController;
 
 use App\Http\Controllers\dosen_pembimbing\PembimbingDashboardController;
-use App\Http\Controllers\dosen_pembimbing\bimbingan\BimbinganController;
-use App\Http\Controllers\dosen_pembimbing\bimbingan\RekomendasiDosenController;
-use App\Http\Controllers\dosen_pembimbing\JadwalTADosenPembimbingController;
-use App\Http\Controllers\dosen_pembimbing\penilaian_bimbingan\PenilaianBimbinganController;
-use App\Http\Controllers\dosen_pembimbing\validasi_skripsi\DosenPembimbingValidasiController;
-use App\Http\Controllers\dosen_pembimbing\validasi_skripsi_penguji\ValidasiSkripsiDospemController;
-
 use App\Http\Controllers\kaprodi\datapesertata\PesertaSidangTAController;
-use App\Http\Controllers\kaprodi\JadwalTAKaprodiController;
-use App\Http\Controllers\kaprodi\JadwalYudisiumKaprodiController;
-use App\Http\Controllers\kaprodi\penilaian\PenilaianTugasAkhirKaprodiController;
-use App\Http\Controllers\kaprodi\validasi_skripsi\ValidasiSkripsiKaprodiController;
-use App\Http\Controllers\kaprodi\validasi_skripsi_penguji\ValidasiSkripsiKaprodiController as Validasi_skripsi_pengujiValidasiSkripsiKaprodiController;
-use App\Http\Controllers\kaprodi\RekapSeminarController;
-
 use App\Http\Controllers\mahasiswa\BerkasAkhir\RevisiMahasiswaController;
-use App\Http\Controllers\mahasiswa\JadwalTAMahasiswaController;
 use App\Http\Controllers\mahasiswa\pendaftaranta\PendaftaranTAController;
-use App\Http\Controllers\mahasiswa\skpi\SKPIMahasiswaController_;
-use App\Http\Controllers\mahasiswa\validasipenguji\ValidasiSkripsiController;
+use App\Http\Controllers\dosen_penilai\seminar\PenilaianSeminarController;
+use App\Http\Controllers\kaprodi\rekomendasi\KaprodiRekomendasiController;
+use App\Http\Controllers\mahasiswa\bimbingan\BimbinganMahasiswaController;
 
-use App\Http\Controllers\perpus\PerpusController;
+use App\Http\Controllers\mahasiswa\bimbingan\PengajuanPembimbingController;
+use App\Http\Controllers\dosen_pembimbing\JadwalTADosenPembimbingController;
+use App\Http\Controllers\mahasiswa\skripsi\PengumpulanBerkasAkhirController;
+use App\Http\Controllers\mahasiswa\validasipenguji\ValidasiSkripsiController;
+use App\Http\Controllers\admin\dosen_penilai\PembagianRuanganPenilaiController;
+use App\Http\Controllers\dosen_pembimbing\bimbingan\RekomendasiDosenController;
+use App\Http\Controllers\kaprodi\seminar\jadwal\JadwalSeminarKaprodiController;
+
+use App\Http\Controllers\kaprodi\penilaian\PenilaianTugasAkhirKaprodiController;
+use App\Http\Controllers\dosen_penilai\validasi_skripsi\ValidasiPengujiController;
+use App\Http\Controllers\kaprodi\validasi_skripsi\ValidasiSkripsiKaprodiController;
+use App\Http\Controllers\admin\datarekomendasisidang\DataRekomendasiSidangController;
+
+use App\Http\Controllers\dosen_pembimbing\penilaian_bimbingan\PenilaianBimbinganController;
+use App\Http\Controllers\dosen_penilai\penilaian\PenilaianTugasAkhirDosenPenilaiController;
+use App\Http\Controllers\dosen_pembimbing\validasi_skripsi\DosenPembimbingValidasiController;
+use App\Http\Controllers\admin\aspekpenilaianbimbingan\AspekPenilaianBimbinganAdminController;
+use App\Http\Controllers\admin\aspekpenilaiansidangta\AspekPenilaianSidangTAHKIAdminController;
+use App\Http\Controllers\admin\aspekpenilaiansidangta\AspekPenilaianSidangTAIlmiahAdminController;
+use App\Http\Controllers\admin\aspekpenilaiansidangta\AspekPenilaianSidangTASkripsiAdminController;
+use App\Http\Controllers\dosen_pembimbing\validasi_skripsi_penguji\ValidasiSkripsiDospemController;
+use App\Http\Controllers\admin\aspekpenilaianbimbingan\AspekPenilaianBimbinganIlmiahAdminController;
+use App\Http\Controllers\admin\aspekpenilaianbimbingan\AspekPenilaianBimbinganSkripsiAdminController;
+use App\Http\Controllers\admin\datakelulusansidangta\DataKelulusanSidangTaController;
+use App\Http\Controllers\admin\datapesertasidangta\DataPesertaSidangTAController;
+use App\Http\Controllers\kaprodi\validasi_skripsi_penguji\ValidasiSkripsiKaprodiController as Validasi_skripsi_pengujiValidasiSkripsiKaprodiController;
 
 //auth
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
@@ -164,6 +175,8 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
     ->name('mahasiswa.update.pendaftaran');
     Route::get('/mahasiswa/skpi/', [SKPIMahasiswaController_::class, 'create'])->name('mahasiswa.skpi');
     Route::post('/skpi', [SKPIMahasiswaController_::class, 'store'])->name('mahasiswa.skpi.store');
+    Route::get('/mahasiswa/skpi/edit', [SKPIMahasiswaController_::class, 'edit'])->name('mahasiswa.skpi.edit');
+    Route::put('/mahasiswa/skpi/update', [SKPIMahasiswaController_::class, 'update'])->name('mahasiswa.skpi.update');
    // Arahkan halaman utama ke index dulu
     Route::get('/mahasiswa/validasi-berkas', [RevisiMahasiswaController::class, 'index'])->name('mahasiswa.berkas-akhir');
     Route::get('/mahasiswa/validasi-berkas/create', [RevisiMahasiswaController::class, 'create'])->name('mahasiswa.berkas-akhir.create');
@@ -274,6 +287,9 @@ Route::middleware(['auth', 'role:kaprodi'])->group(function () {
     Route::post('/kaprodi/penilaiTAMahasiswaPenguji2', [PenilaianTugasAkhirKaprodiController::class, 'simpanPenguji2'])->name('penilaian.penguji2');
     Route::post('/kaprodi/penilaiTAMahasiswaPembimbing1', [PenilaianTugasAkhirKaprodiController::class, 'simpanPembimbing1'])->name('penilaian.pembimbing1');
     Route::post('/kaprodi/penilaiTAMahasiswaPembimbing2', [PenilaianTugasAkhirKaprodiController::class, 'simpanPembimbing2'])->name('penilaian.pembimbing2');
+    Route::post('/kaprodi/penilaian/store', [PenilaianTugasAkhirKaprodiController::class,'store'])->name('penilaian.store.bimbingan.kaprodi');
+    Route::get('/kaprodi/penilaian/kriteria/bimbingan', [PenilaianTugasAkhirKaprodiController::class,'getKriteria'])
+    ->name('penilaian.getKriteria.bimbingan.kaprodi');
 
     //
     Route::get('/kaprodi/daftarnilaita',[PenilaianTugasAkhirKaprodiController::class, 'indexPenguji'])->name('kaprodi.daftarpenilaian');
@@ -288,6 +304,10 @@ Route::middleware(['auth', 'role:kaprodi'])->group(function () {
     Route::put('/kaprodi-penilaian/update-pembimbing-1/{id}', [PenilaianTugasAkhirKaprodiController::class, 'updatePembimbing1'])->name('penilaian.updatepembimbing1');
     Route::get('/kaprodi-penilaian/pembimbing2/{id}', [PenilaianTugasAkhirKaprodiController::class, 'editPembimbing2'])->name('kaprodi.penilaian.penguji2.edit');
     Route::put('/kaprodi-penilaian/update-pembimbing-2/{id}', [PenilaianTugasAkhirKaprodiController::class, 'updatePembimbing2'])->name('penilaian.updatepembimbing2');
+
+    Route::post('/kaprodi/penilaian/simpan', [PenilaianTugasAkhirKaprodiController::class, 'simpan'])->name('penilaian.simpan.sidang.kaprodi');
+    Route::get('/kaprodi/penilaian/kriteria/sidang', [PenilaianTugasAkhirKaprodiController::class,'getKriteriaPenguji'])
+    ->name('penilaian.kriteria.sidang.kaprodi');
 
     Route::get('/kaprodi/jadwal-yudisium-create', [JadwalYudisiumKaprodiController::class, 'create'])->name('yudisium.create');
     Route::get('/kaprodi/jadwal-yudisium', [JadwalYudisiumKaprodiController::class, 'index'])->name('yudisium.index');
@@ -330,6 +350,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // rekap bimbingan
     Route::get('/admin/rekap-bimbingan', [RekapBimbinganAdminController::class, 'index'])->name('rekap.bimbingan.admin');
     Route::get('/admin/rekap-bimbingan/export', [RekapBimbinganAdminController::class, 'export'])->name('rekap.bimbingan.export.admin');
+
+    //datarekoendasi
+    Route::get('/admin/datarekomendasi', [DataRekomendasiSidangController::class, 'index'])->name('admin.rekomendasi.data');
+    Route::get('/admin/datapesertasidangta/data', [DataPesertaSidangTAController::class, 'index'])->name('admin.test.data');
+    Route::get('/admin/sidangta/kelulusan', [DataKelulusanSidangTaController::class, 'index'])->name('sidangta.kelulusan');
+
+
+    
 
     //role
     Route::get('/admin/users', [UserRoleController::class, 'index'])->name('users.index');
@@ -377,6 +405,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/skpi', [SKPIAdminController::class, 'index'])->name('admin.skpi.index');
     Route::get('/admin/skpi/{id}/edit', [SKPIAdminController::class, 'edit'])->name('admin.skpi.edit');
     Route::put('/admin/skpi/{id}', [SKPIAdminController::class, 'update'])->name('admin.skpi.update');
+    Route::delete('/admin/skpi/{id}', [SKPIAdminController::class, 'destroy'])->name('admin.skpi.destroy');
     Route::get('/admin/info-terbaru', [InfoTerbaruController::class, 'index'])->name('infoTerbaru.index');
     Route::get('/admin/info-terbaru/create', [InfoTerbaruController::class, 'create'])->name('infoTerbaru.create');
     Route::post('/admin/info-terbaru/store', [InfoTerbaruController::class, 'store'])->name('infoTerbaru.store');
@@ -384,6 +413,47 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/admin/info-terbaru/{id}', [InfoTerbaruController::class, 'update'])->name('infoTerbaru.update');
     Route::delete('/admin/info-terbaru/{id}', [InfoTerbaruController::class, 'destroy'])->name('infoTerbaru.destroy');
     Route::get('/admin/validasi-skripsi', [AdminValidasiController::class, 'index'])->name('admin.validasi.index');
+
+       // INDEX (tabel daftar aspek penilaian)
+    Route::get('/penilaian-bimbingan/create', [AspekPenilaianBimbinganAdminController::class, 'create'])->name('penilaian.hki.create');
+    Route::post('/penilaian-bimbingan', [AspekPenilaianBimbinganAdminController::class, 'store'])->name('penilaian.hki.store');
+    Route::get('/penilaian-bimbingan/{id}/edit', [AspekPenilaianBimbinganAdminController::class, 'edit'])->name('penilaian.hki.edit');
+    Route::put('/penilaian-bimbingan/{id}', [AspekPenilaianBimbinganAdminController::class, 'update'])->name('penilaian.hki.update');
+    Route::delete('/penilaian-bimbingan/{id}', [AspekPenilaianBimbinganAdminController::class, 'destroy'])->name('penilaian.hki.destroy');
+  
+Route::get('/admin/aspek-penilaian', [AspekPenilaianBimbinganAdminController::class, 'index'])->name('penilaian.hki.index');
+    
+
+    //aspek penilaian skripsi
+    Route::get('/penilaian-bimbingan-skripsi/create', [AspekPenilaianBimbinganSkripsiAdminController::class, 'create'])->name('penilaian.skripsi.create');
+    Route::post('/penilaian-bimbingan-skripsi', [AspekPenilaianBimbinganSkripsiAdminController::class, 'store'])->name('penilaian.skripsi.store');
+    Route::get('/penilaian-bimbingan-skripsi/{id}/edit', [AspekPenilaianBimbinganSkripsiAdminController::class, 'edit'])->name('penilaian.skripsi.edit');
+    Route::put('/penilaian-bimbingan-skripsi/{id}', [AspekPenilaianBimbinganSkripsiAdminController::class, 'update'])->name('penilaian.skripsi.update');
+    Route::delete('/penilaian-bimbingan-skripsi/{id}', [AspekPenilaianBimbinganSkripsiAdminController::class, 'destroy'])->name('penilaian.skripsi.destroy');
+
+    Route::get('/penilaian-bimbingan-ilmiah/create', [AspekPenilaianBimbinganIlmiahAdminController::class, 'create'])->name('penilaian.ilmiah.create');
+    Route::post('/penilaian-bimbingan-ilmiah', [AspekPenilaianBimbinganIlmiahAdminController::class, 'store'])->name('penilaian.ilmiah.store');
+    Route::get('/penilaian-bimbingan-ilmiah/{id}/edit', [AspekPenilaianBimbinganIlmiahAdminController::class, 'edit'])->name('penilaian.ilmiah.edit');
+    Route::put('/penilaian-bimbingan-ilmiah/{id}', [AspekPenilaianBimbinganIlmiahAdminController::class, 'update'])->name('penilaian.ilmiah.update');
+    Route::delete('/penilaian-bimbingan-ilmiah/{id}', [AspekPenilaianBimbinganIlmiahAdminController::class, 'destroy'])->name('penilaian.ilmiah.destroy');
+
+    Route::get('/penilaian-sidang-hki/create', [AspekPenilaianSidangTAHKIAdminController::class, 'create'])->name('penilaian.sidang.hki.create');
+    Route::post('/penilaian-sidang-hki', [AspekPenilaianSidangTAHKIAdminController::class, 'store'])->name('penilaian.sidang.hki.store');
+    Route::get('/penilaian-sidang-hki/{id}/edit', [AspekPenilaianSidangTAHKIAdminController::class, 'edit'])->name('penilaian.sidang.hki.edit');
+    Route::put('/penilaian-sidang-hki/{id}', [AspekPenilaianSidangTAHKIAdminController::class, 'update'])->name('penilaian.sidang.hki.update');
+    Route::delete('/penilaian-sidang-hki/{id}', [AspekPenilaianSidangTAHKIAdminController::class, 'destroy'])->name('penilaian.sidang.hki.destroy');
+
+    Route::get('/penilaian-sidang-skripsi/create', [AspekPenilaianSidangTASkripsiAdminController::class, 'create'])->name('penilaian.sidang.skripsi.create');
+    Route::post('/penilaian-sidang-skripsi', [AspekPenilaianSidangTASkripsiAdminController::class, 'store'])->name('penilaian.sidang.skripsi.store');
+    Route::get('/penilaian-sidang-skripsi/{id}/edit', [AspekPenilaianSidangTASkripsiAdminController::class, 'edit'])->name('penilaian.sidang.skripsi.edit');
+    Route::put('/penilaian-sidang-skripsi/{id}', [AspekPenilaianSidangTASkripsiAdminController::class, 'update'])->name('penilaian.sidang.skripsi.update');
+    Route::delete('/penilaian-sidang-skripsi/{id}', [AspekPenilaianSidangTASkripsiAdminController::class, 'destroy'])->name('penilaian.sidang.skripsi.destroy');
+
+     Route::get('/penilaian-sidang-ilmiah/create', [AspekPenilaianSidangTAIlmiahAdminController::class, 'create'])->name('penilaian.sidang.ilmiah.create');
+    Route::post('/penilaian-sidang-ilmiah', [AspekPenilaianSidangTAIlmiahAdminController::class, 'store'])->name('penilaian.sidang.ilmiah.store');
+    Route::get('/penilaian-sidang-ilmiah/{id}/edit', [AspekPenilaianSidangTAIlmiahAdminController::class, 'edit'])->name('penilaian.sidang.ilmiah.edit');
+    Route::put('/penilaian-sidang-ilmiah/{id}', [AspekPenilaianSidangTAIlmiahAdminController::class, 'update'])->name('penilaian.sidang.ilmiah.update');
+    Route::delete('/penilaian-sidang-ilmiah/{id}', [AspekPenilaianSidangTAIlmiahAdminController::class, 'destroy'])->name('penilaian.sidang.ilmiah.destroy');
 
 
 });
@@ -412,6 +482,9 @@ Route::middleware(['auth', 'role:dosen_penilai'])->group(function () {
     Route::post('/dosen-penilai/penilaiTAMahasiswaPenguji2', [PenilaianTugasAkhirDosenPenilaiController::class, 'simpanPenguji2'])->name('dosen-penilai.penguji2');
     Route::post('/dosen-penilai/penilaiTAMahasiswaPembimbing1', [PenilaianTugasAkhirDosenPenilaiController::class, 'simpanPembimbing1'])->name('dosen-penilai.pembimbing1');
     Route::post('/dosen-penilai/penilaiTAMahasiswaPembimbing2', [PenilaianTugasAkhirDosenPenilaiController::class, 'simpanPembimbing2'])->name('dosen-penilai.pembimbing2');
+    Route::post('/dosen-penilai/simpan', [PenilaianTugasAkhirDosenPenilaiController::class, 'simpan'])->name('penilaian.simpan.sidangpenilai');
+    Route::get('/dosen-penilai/kriteria', [PenilaianTugasAkhirDosenPenilaiController::class, 'getKriteria'])->name('penilaian.kriteria.sidangpenilai');
+
 
     Route::get('/dosen-penilai/daftarnilaipenguji',[PenilaianTugasAkhirDosenPenilaiController::class, 'indexPenguji'])->name('dosen-penilai.daftarpenilaian');
     Route::get('/dosen-penilai/daftarnilaipembimbing',[PenilaianTugasAkhirDosenPenilaiController::class, 'indexPembimbing'])->name('dosen-penilai.daftarpenilaianpembimbing');
@@ -452,8 +525,12 @@ Route::middleware(['auth', 'role:dosen_pembimbing'])->group(function () {
     Route::get('/dosen-pembimbing/jadwalta', [JadwalTADosenPembimbingController::class, 'index'])->name('dosen-pembimbing-ta');
 
     //penilaian
+    Route::get('/penilaian/get/{mahasiswa}/{peran}', [PenilaianBimbinganController::class, 'getPenilaian']);
+    Route::put('/penilaian/update/{mahasiswaId}', [PenilaianBimbinganController::class, 'update'])->name('penilaian.update.bimbingan');
+    Route::get('/dosen-pembimbing/penilaian', [PenilaianBimbinganController::class,'createPembimbing'])->name('penilaian.index');
+    Route::get('/dosen-pembimbing/penilaian/kriteria', [PenilaianBimbinganController::class,'getKriteria'])->name('penilaian.getKriteria');
+    Route::post('/dosen-pembimbing/penilaian/store', [PenilaianBimbinganController::class,'store'])->name('penilaian.store');
     Route::get('/dosen-pembimbing/penilaianpenguji',[PenilaianBimbinganController::class, 'createPenguji'])->name('dosen-pembimbing.penilaian');
-    Route::get('/dosen-pembimbing/penilaianpembimbing',[PenilaianBimbinganController::class, 'createPembimbing'])->name('dosen-pembimbing.penilaianpembimbing');
     Route::post('/dosen-pembimbing/penilaiTAMahasiswaKetuaPenguji', [PenilaianBimbinganController::class, 'simpanKetuaPenguji'])->name('dosen-pembimbing.ketua');
     Route::post('/dosen-pembimbing/penilaiTAMahasiswaPenguji1', [PenilaianBimbinganController::class, 'simpanPenguji1'])->name('dosen-pembimbing.penguji1');
     Route::post('/dosen-pembimbing/penilaiTAMahasiswaPenguji2', [PenilaianBimbinganController::class, 'simpanPenguji2'])->name('dosen-pembimbing.penguji2');
@@ -461,6 +538,8 @@ Route::middleware(['auth', 'role:dosen_pembimbing'])->group(function () {
     Route::post('/dosen-pembimbing/penilaiTAMahasiswaPembimbing2', [PenilaianBimbinganController::class, 'simpanPembimbing2'])->name('dosen-pembimbing.pembimbing2');
     Route::get('/dosen-pembimbing/daftarnilaipenguji',[PenilaianBimbinganController::class, 'indexPenguji'])->name('dosen-pembimbing.daftarpenilaian');
     Route::get('/dosen-pembimbing/daftarnilaipembimbing',[PenilaianBimbinganController::class, 'indexPembimbing'])->name('dosen-pembimbing.daftarpenilaianpembimbing');
+    // route/web.php
+    Route::get('/get-kriteria-edit/{penilaianId}', [PenilaianBimbinganController::class, 'getKriteriaEdit'])->name('penilaian.getKriteriaEdit');
     
     Route::get('/dosen-pembimbing/ketua/{id}', [PenilaianBimbinganController::class, 'editKetuaPEnguji'])->name('dosen-pembimbing.penilaian.ketua.edit');
     Route::put('/dosen-pembimbing/update-ketua-penguji/{id}', [PenilaianBimbinganController::class, 'updateKetuaPenguji'])->name('dosen-pembimbing.updateKetuaPenguji');

@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers\dosen_pembimbing\penilaian_bimbingan;
 
-use App\Http\Controllers\Controller;
+use App\Models\Seminar;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\PendaftaranSidangTA;
 use App\Models\PenilaianTugasAkhir;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\PenilaianBimbinganHKI;
+use App\Models\PenilaianBimbinganIlmiah;
+use App\Models\PenilaianDosenPembimbing;
+use App\Models\PenilaianBimbinganSkripsi;
+
 
 class PenilaianBimbinganController extends Controller
 {
@@ -174,347 +181,627 @@ class PenilaianBimbinganController extends Controller
           
         return view('dosen_pembimbing.penilaian.indexPembimbing', compact('daftartabel1','daftartabel2'));
     }
-    public function createPembimbing(){
-         $mahasiswa = PendaftaranSidangTA::select('id', 'nama', 'nim', 'judul_skripsi')->get();
-        return view('dosen_pembimbing.penilaian.bimbingan', compact('mahasiswa'));
-    }
-    public function createPenguji(){
-         $mahasiswa = PendaftaranSidangTA::select('id', 'nama', 'nim', 'judul_skripsi')->get();
-        return view('dosen_pembimbing.penilaian.ta', compact('mahasiswa'));
-    }
-    public function simpanKetuaPenguji(Request $request)
+    public function createPembimbing(Request $request)
     {
-        // Cek apakah sudah ada data Ketua Penguji untuk mahasiswa ini
-        $user_id = Auth::user()->id;
-        $total_nilai_kp = $request->sikap_kp*5 +
-                    $request->mampu_menjelaskan_topik_kp*5 +
-                    $request->mampu_menjelaskan_hasil_kp*15 +
-                    $request->simulasi_produk_kp*20 +
-                    $request->pengujian_produk_kp*10 +
-                    $request->produk_bermanfaat_kp*15 +
-                    $request->kejelasan_proses_kp*10 +
-                    $request->susunan_laporan_kp*5 +
-                    $request->isi_laporan_kp*10 +
-                    $request->kualitas_penulisan_kp*5;
-        $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
-            ->first();
-        if ($penilaian) {
+        $dosenId = auth()->id();
 
-            $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
-            $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
-            $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
-            // Update data
-            $penilaian->update([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'ketua_penguji_id' => $user_id,
-                'judul' => $request->judul,
-                'sikap_kp' => $request->sikap_kp*5,
-                'mampu_menjelaskan_topik_kp' => $request->mampu_menjelaskan_topik_kp*5,
-                'mampu_menjelaskan_hasil_kp' => $request->mampu_menjelaskan_hasil_kp*15,
-                'simulasi_produk_kp' => $request->simulasi_produk_kp*20,
-                'pengujian_produk_kp' => $request->pengujian_produk_kp*10,
-                'produk_bermanfaat_kp' => $request->produk_bermanfaat_kp*15,
-                'kejelasan_proses_kp' => $request->kejelasan_proses_kp*10,
-                'susunan_laporan_kp' => $request->susunan_laporan_kp*5,
-                'isi_laporan_kp' => $request->isi_laporan_kp*10,
-                'kualitas_penulisan_kp' => $request->kualitas_penulisan_kp*5,
-                'total_nilai_kp'=> $total_nilai_kp,
-                'total_score_penguji'=> $nilaipenguji*0.75,
-                'status_sidang_kp' => $request->status_sidang_kp,
-                'total_score'=> $totalscore,
-            ]);
-        } else {
-            // Buat baru
-            PenilaianTugasAkhir::create([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'ketua_penguji_id' => $user_id,
-                'nim' => $request->nim,
-                'judul' => $request->judul,
-                'sikap_kp' => $request->sikap_kp*5,
-                'mampu_menjelaskan_topik_kp' => $request->mampu_menjelaskan_topik_kp*5,
-                'mampu_menjelaskan_hasil_kp' => $request->mampu_menjelaskan_hasil_kp*15,
-                'simulasi_produk_kp' => $request->simulasi_produk_kp*20,
-                'pengujian_produk_kp' => $request->pengujian_produk_kp*10,
-                'produk_bermanfaat_kp' => $request->produk_bermanfaat_kp*15,
-                'kejelasan_proses_kp' => $request->kejelasan_proses_kp*10,
-                'susunan_laporan_kp' => $request->susunan_laporan_kp*5,
-                'isi_laporan_kp' => $request->isi_laporan_kp*10,
-                'kualitas_penulisan_kp' => $request->kualitas_penulisan_kp*5,
-                'total_nilai_kp'=> $total_nilai_kp,
-                'status_sidang_kp' => $request->status_sidang_kp,
-            ]);
-        }
-        return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
+        $mahasiswaPembimbing1 = Seminar::with('mahasiswa')
+            ->leftJoin('penilaian_dosen_pembimbing as pdp', 'seminars.user_id', '=', 'pdp.mahasiswa_id')
+            ->where('seminars.dosen_penilai_1', $dosenId)
+            ->select(
+                'seminars.*',
+                'pdp.total_dosbing1'
+            )
+            ->get();
+
+        $mahasiswaPembimbing2 = Seminar::with('mahasiswa')
+            ->leftJoin('penilaian_dosen_pembimbing as pdp', 'seminars.user_id', '=', 'pdp.mahasiswa_id')
+            ->where('seminars.dosen_penilai_2', $dosenId)
+            ->select(
+                'seminars.*',
+                'pdp.total_dosbing2'
+            )
+            ->get();
+
+        $penilaian = PenilaianDosenPembimbing::whereIn('mahasiswa_id', 
+        $mahasiswaPembimbing1->pluck('mahasiswa_id'))->get();
+
+        // default kriteria (HKI)
+        $kriteria = PenilaianBimbinganHKI::select('id','kriteria','bobot')->orderBy('id')->get();
+
+        return view('dosen_pembimbing.penilaian.bimbingan', compact(
+            'mahasiswaPembimbing1','mahasiswaPembimbing2','kriteria','penilaian'
+        ));
     }
-    public function simpanPenguji1(Request $request)
+
+    public function getKriteria(Request $request)
     {
-        // Cek apakah sudah ada data Ketua Penguji untuk mahasiswa ini
-        $user_id = Auth::user()->id;
-        $total_nilai_p1 = $request->sikap_p1*5 +
-                    $request->mampu_menjelaskan_topik_p1*5 +
-                    $request->mampu_menjelaskan_hasil_p1*15 +
-                    $request->simulasi_produk_p1*20 +
-                    $request->pengujian_produk_p1*10 +
-                    $request->produk_bermanfaat_p1*15 +
-                    $request->kejelasan_proses_p1*10 +
-                    $request->susunan_laporan_p1*5 +
-                    $request->isi_laporan_p1*10 +
-                    $request->kualitas_penulisan_p1*5;
-        $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
-            ->first();
+        $jenis = $request->jenis;
+        switch ($jenis) {
+            case 'skripsi':
+                $kriteria = PenilaianBimbinganSkripsi::all();
+                break;
+            case 'ilmiah':
+                $kriteria = PenilaianBimbinganIlmiah::all();
+                break;
+            default:
+                $kriteria = PenilaianBimbinganHKI::all();
+        }
+        return response()->json($kriteria);
+    }
+
+    public function store(Request $request)
+    {
+        $dosenId = auth()->id();
+        $mahasiswaId = $request->mahasiswa_id;
+        $peran = $request->peran_pembimbing;
+
+        // ambil array nilai & bobot
+        $nilaiInput = $request->input('nilai', []);   // contoh: [3, 4, 5]
+        $bobotInput = $request->input('bobot', []);   // contoh: [20, 15, 10]
+
+        $penilaian = PenilaianDosenPembimbing::firstOrNew([
+            'mahasiswa_id' => $mahasiswaId,
+        ]);
+
+        $total = 0;
+        $i = 1;
+
+        foreach ($nilaiInput as $kritId => $nilai) {
+            $bobot = $bobotInput[$kritId] ?? 0;
+            $nilaiDenganBobot = $nilai * $bobot;
+
+            if ($peran == 1) {
+                $penilaian->dosbing1_id = $dosenId;
+                $penilaian->{"nilai{$i}_dosbing1"} = $nilaiDenganBobot;
+            } else {
+                $penilaian->dosbing2_id = $dosenId;
+                $penilaian->{"nilai{$i}_dosbing2"} = $nilaiDenganBobot;
+            }
+
+            $total += $nilaiDenganBobot;
+            $i++;
+        }
+
+        // Simpan total sesuai pembimbing
+        if ($peran == 1) {
+            $penilaian->total_dosbing1 = $total;
+        } else {
+            $penilaian->total_dosbing2 = $total;
+        }
+
+        // Jika kedua dosen sudah isi, hitung rata-rata
+        if ($penilaian->total_dosbing1 && $penilaian->total_dosbing2) {
+            $penilaian->rata_rata = ($penilaian->total_dosbing1 + $penilaian->total_dosbing2) / 2;
+        }
+
+        $penilaian->save();
+
+        return back()->with('success', 'Penilaian berhasil disimpan.');
+    }
+
+
+
+    public function createPenguji(){
+            $mahasiswa = PendaftaranSidangTA::select('id', 'nama', 'nim', 'judul_skripsi')->get();
+            return view('dosen_pembimbing.penilaian.ta', compact('mahasiswa'));
+    }
+    // public function simpanKetuaPenguji(Request $request)
+    // {
+    //     // Cek apakah sudah ada data Ketua Penguji untuk mahasiswa ini
+    //     $user_id = Auth::user()->id;
+    //     $total_nilai_kp = $request->sikap_kp*5 +
+    //                 $request->mampu_menjelaskan_topik_kp*5 +
+    //                 $request->mampu_menjelaskan_hasil_kp*15 +
+    //                 $request->simulasi_produk_kp*20 +
+    //                 $request->pengujian_produk_kp*10 +
+    //                 $request->produk_bermanfaat_kp*15 +
+    //                 $request->kejelasan_proses_kp*10 +
+    //                 $request->susunan_laporan_kp*5 +
+    //                 $request->isi_laporan_kp*10 +
+    //                 $request->kualitas_penulisan_kp*5;
+    //     $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
+    //         ->first();
+    //     if ($penilaian) {
+
+    //         $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
+    //         $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
+    //         $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
+    //         // Update data
+    //         $penilaian->update([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'ketua_penguji_id' => $user_id,
+    //             'judul' => $request->judul,
+    //             'sikap_kp' => $request->sikap_kp*5,
+    //             'mampu_menjelaskan_topik_kp' => $request->mampu_menjelaskan_topik_kp*5,
+    //             'mampu_menjelaskan_hasil_kp' => $request->mampu_menjelaskan_hasil_kp*15,
+    //             'simulasi_produk_kp' => $request->simulasi_produk_kp*20,
+    //             'pengujian_produk_kp' => $request->pengujian_produk_kp*10,
+    //             'produk_bermanfaat_kp' => $request->produk_bermanfaat_kp*15,
+    //             'kejelasan_proses_kp' => $request->kejelasan_proses_kp*10,
+    //             'susunan_laporan_kp' => $request->susunan_laporan_kp*5,
+    //             'isi_laporan_kp' => $request->isi_laporan_kp*10,
+    //             'kualitas_penulisan_kp' => $request->kualitas_penulisan_kp*5,
+    //             'total_nilai_kp'=> $total_nilai_kp,
+    //             'total_score_penguji'=> $nilaipenguji*0.75,
+    //             'status_sidang_kp' => $request->status_sidang_kp,
+    //             'total_score'=> $totalscore,
+    //         ]);
+    //     } else {
+    //         // Buat baru
+    //         PenilaianTugasAkhir::create([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'ketua_penguji_id' => $user_id,
+    //             'nim' => $request->nim,
+    //             'judul' => $request->judul,
+    //             'sikap_kp' => $request->sikap_kp*5,
+    //             'mampu_menjelaskan_topik_kp' => $request->mampu_menjelaskan_topik_kp*5,
+    //             'mampu_menjelaskan_hasil_kp' => $request->mampu_menjelaskan_hasil_kp*15,
+    //             'simulasi_produk_kp' => $request->simulasi_produk_kp*20,
+    //             'pengujian_produk_kp' => $request->pengujian_produk_kp*10,
+    //             'produk_bermanfaat_kp' => $request->produk_bermanfaat_kp*15,
+    //             'kejelasan_proses_kp' => $request->kejelasan_proses_kp*10,
+    //             'susunan_laporan_kp' => $request->susunan_laporan_kp*5,
+    //             'isi_laporan_kp' => $request->isi_laporan_kp*10,
+    //             'kualitas_penulisan_kp' => $request->kualitas_penulisan_kp*5,
+    //             'total_nilai_kp'=> $total_nilai_kp,
+    //             'status_sidang_kp' => $request->status_sidang_kp,
+    //         ]);
+    //     }
+    //     return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
+    // }
+    // public function simpanPenguji1(Request $request)
+    // {
+    //     // Cek apakah sudah ada data Ketua Penguji untuk mahasiswa ini
+    //     $user_id = Auth::user()->id;
+    //     $total_nilai_p1 = $request->sikap_p1*5 +
+    //                 $request->mampu_menjelaskan_topik_p1*5 +
+    //                 $request->mampu_menjelaskan_hasil_p1*15 +
+    //                 $request->simulasi_produk_p1*20 +
+    //                 $request->pengujian_produk_p1*10 +
+    //                 $request->produk_bermanfaat_p1*15 +
+    //                 $request->kejelasan_proses_p1*10 +
+    //                 $request->susunan_laporan_p1*5 +
+    //                 $request->isi_laporan_p1*10 +
+    //                 $request->kualitas_penulisan_p1*5;
+    //     $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
+    //         ->first();
 
        
         
 
-        if ($penilaian) {
+    //     if ($penilaian) {
 
-            $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
-            $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
-            $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
-            // Update data
-            $penilaian->update([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'penguji1_id' => $user_id,
-                'judul' => $request->judul,
-                'sikap_penguji1' => $request->sikap_p1*5,
-                'mampu_menjelaskan_topik_penguji1' => $request->mampu_menjelaskan_topik_p1*5,
-                'mampu_menjelaskan_hasil_penguji1' => $request->mampu_menjelaskan_hasil_p1*15,
-                'simulasi_produk_penguji1' => $request->simulasi_produk_p1*20,
-                'pengujian_produk_penguji1' => $request->pengujian_produk_p1*10,
-                'produk_bermanfaat_penguji1' => $request->produk_bermanfaat_p1*15,
-                'kejelasan_proses_penguji1' => $request->kejelasan_proses_p1*10,
-                'susunan_laporan_penguji1' => $request->susunan_laporan_p1*5,
-                'isi_laporan_penguji1' => $request->isi_laporan_p1*10,
-                'kualitas_penulisan_penguji1' => $request->kualitas_penulisan_p1*5,
-                'total_nilai_penguji1'=> $total_nilai_p1,
-                'total_score_penguji'=> $nilaipenguji*0.75,
-                'total_score'=> $totalscore,
-            ]);
-        } else {
-            // Buat baru
-            PenilaianTugasAkhir::create([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'penguji1_id' => $user_id,
-                'nim' => $request->nim,
-                'judul' => $request->judul,
-                'sikap_penguji1' => $request->sikap_p1*5,
-                'mampu_menjelaskan_topik_penguji1' => $request->mampu_menjelaskan_topik_p1*5,
-                'mampu_menjelaskan_hasil_penguji1' => $request->mampu_menjelaskan_hasil_p1*15,
-                'simulasi_produk_penguji1' => $request->simulasi_produk_p1*20,
-                'pengujian_produk_penguji1' => $request->pengujian_produk_p1*10,
-                'produk_bermanfaat_penguji1' => $request->produk_bermanfaat_p1*15,
-                'kejelasan_proses_penguji1' => $request->kejelasan_proses_p1*10,
-                'susunan_laporan_penguji1' => $request->susunan_laporan_p1*5,
-                'isi_laporan_penguji1' => $request->isi_laporan_p1*10,
-                'kualitas_penulisan_penguji1' => $request->kualitas_penulisan_p1*5,
-                'total_nilai_penguji1'=> $total_nilai_p1,
-            ]);
-        }
+    //         $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
+    //         $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
+    //         $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
+    //         // Update data
+    //         $penilaian->update([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'penguji1_id' => $user_id,
+    //             'judul' => $request->judul,
+    //             'sikap_penguji1' => $request->sikap_p1*5,
+    //             'mampu_menjelaskan_topik_penguji1' => $request->mampu_menjelaskan_topik_p1*5,
+    //             'mampu_menjelaskan_hasil_penguji1' => $request->mampu_menjelaskan_hasil_p1*15,
+    //             'simulasi_produk_penguji1' => $request->simulasi_produk_p1*20,
+    //             'pengujian_produk_penguji1' => $request->pengujian_produk_p1*10,
+    //             'produk_bermanfaat_penguji1' => $request->produk_bermanfaat_p1*15,
+    //             'kejelasan_proses_penguji1' => $request->kejelasan_proses_p1*10,
+    //             'susunan_laporan_penguji1' => $request->susunan_laporan_p1*5,
+    //             'isi_laporan_penguji1' => $request->isi_laporan_p1*10,
+    //             'kualitas_penulisan_penguji1' => $request->kualitas_penulisan_p1*5,
+    //             'total_nilai_penguji1'=> $total_nilai_p1,
+    //             'total_score_penguji'=> $nilaipenguji*0.75,
+    //             'total_score'=> $totalscore,
+    //         ]);
+    //     } else {
+    //         // Buat baru
+    //         PenilaianTugasAkhir::create([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'penguji1_id' => $user_id,
+    //             'nim' => $request->nim,
+    //             'judul' => $request->judul,
+    //             'sikap_penguji1' => $request->sikap_p1*5,
+    //             'mampu_menjelaskan_topik_penguji1' => $request->mampu_menjelaskan_topik_p1*5,
+    //             'mampu_menjelaskan_hasil_penguji1' => $request->mampu_menjelaskan_hasil_p1*15,
+    //             'simulasi_produk_penguji1' => $request->simulasi_produk_p1*20,
+    //             'pengujian_produk_penguji1' => $request->pengujian_produk_p1*10,
+    //             'produk_bermanfaat_penguji1' => $request->produk_bermanfaat_p1*15,
+    //             'kejelasan_proses_penguji1' => $request->kejelasan_proses_p1*10,
+    //             'susunan_laporan_penguji1' => $request->susunan_laporan_p1*5,
+    //             'isi_laporan_penguji1' => $request->isi_laporan_p1*10,
+    //             'kualitas_penulisan_penguji1' => $request->kualitas_penulisan_p1*5,
+    //             'total_nilai_penguji1'=> $total_nilai_p1,
+    //         ]);
+    //     }
 
-        return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
-    }
-    public function simpanPenguji2(Request $request)
-    {
-        // Cek apakah sudah ada data Ketua Penguji untuk mahasiswa ini
-        $user_id = Auth::user()->id;
-        $total_nilai_p2 = $request->sikap_p2*5 +
-                    $request->mampu_menjelaskan_topik_p2*5 +
-                    $request->mampu_menjelaskan_hasil_p2*15 +
-                    $request->simulasi_produk_p2*20 +
-                    $request->pengujian_produk_p2*10 +
-                    $request->produk_bermanfaat_p2*15 +
-                    $request->kejelasan_proses_p2*10 +
-                    $request->susunan_laporan_p2*5 +
-                    $request->isi_laporan_p2*10 +
-                    $request->kualitas_penulisan_p2*5;
-        $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
-            ->first();
-        if ($penilaian) {
+    //     return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
+    // }
+    // public function simpanPenguji2(Request $request)
+    // {
+    //     // Cek apakah sudah ada data Ketua Penguji untuk mahasiswa ini
+    //     $user_id = Auth::user()->id;
+    //     $total_nilai_p2 = $request->sikap_p2*5 +
+    //                 $request->mampu_menjelaskan_topik_p2*5 +
+    //                 $request->mampu_menjelaskan_hasil_p2*15 +
+    //                 $request->simulasi_produk_p2*20 +
+    //                 $request->pengujian_produk_p2*10 +
+    //                 $request->produk_bermanfaat_p2*15 +
+    //                 $request->kejelasan_proses_p2*10 +
+    //                 $request->susunan_laporan_p2*5 +
+    //                 $request->isi_laporan_p2*10 +
+    //                 $request->kualitas_penulisan_p2*5;
+    //     $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
+    //         ->first();
+    //     if ($penilaian) {
 
-            $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
-            $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
-            $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
-            // Update data
-            $penilaian->update([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'penguji2_id' => $user_id,
-                'judul' => $request->judul,
-                'sikap_penguji2' => $request->sikap_p2*5,
-                'mampu_menjelaskan_topik_penguji2' => $request->mampu_menjelaskan_topik_p2*5,
-                'mampu_menjelaskan_hasil_penguji2' => $request->mampu_menjelaskan_hasil_p2*15,
-                'simulasi_produk_penguji2' => $request->simulasi_produk_p2*20,
-                'pengujian_produk_penguji2' => $request->pengujian_produk_p2*10,
-                'produk_bermanfaat_penguji2' => $request->produk_bermanfaat_p2*15,
-                'kejelasan_proses_penguji2' => $request->kejelasan_proses_p2*10,
-                'susunan_laporan_penguji2' => $request->susunan_laporan_p2*5,
-                'isi_laporan_penguji2' => $request->isi_laporan_p2*10,
-                'kualitas_penulisan_penguji2' => $request->kualitas_penulisan_p2*5,
-                'total_nilai_penguji2'=> $total_nilai_p2,
-                'total_score_penguji'=> $nilaipenguji*0.75,
-                'total_score'=> $totalscore,
-            ]);
-        } else {
-            // Buat baru
-            PenilaianTugasAkhir::create([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'penguji2_id' => $user_id,
-                'nim' => $request->nim,
-                'judul' => $request->judul,
-                'sikap_penguji2' => $request->sikap_p2*5,
-                'mampu_menjelaskan_topik_penguji2' => $request->mampu_menjelaskan_topik_p2*5,
-                'mampu_menjelaskan_hasil_penguji2' => $request->mampu_menjelaskan_hasil_p2*15,
-                'simulasi_produk_penguji2' => $request->simulasi_produk_p2*20,
-                'pengujian_produk_penguji2' => $request->pengujian_produk_p2*10,
-                'produk_bermanfaat_penguji2' => $request->produk_bermanfaat_p2*15,
-                'kejelasan_proses_penguji2' => $request->kejelasan_proses_p2*10,
-                'susunan_laporan_penguji2' => $request->susunan_laporan_p2*5,
-                'isi_laporan_penguji2' => $request->isi_laporan_p2*10,
-                'kualitas_penulisan_penguji2' => $request->kualitas_penulisan_p2*5,
-                'total_nilai_penguji2'=> $total_nilai_p2,
-            ]);
-        }
-        return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
-    }
-    public function simpanPembimbing1(Request $request)
-    {
-        $user_id = Auth::user()->id;
-        $total_nilai_p1 = $request->pelaksanaan_bimbingan_p1*5 +
-                    $request->daya_kritis_p1*10 +
-                    $request->sikap_p1*5 +
-                    $request->tujuan_utama_p1*5 +
-                    $request->topik_penelitian_p1*15 +
-                    $request->latar_belakang_p1*5+
-                    $request->teori_p1*5 +
-                    $request->desain_dan_perancangan_p1*15 +
-                    $request->hasil_p1*5 +
-                    $request->pengujian_p1*5 +
-                    $request->hasil_penelitian_p1*15+
-                    $request->kesimpulan_p1*5+
-                    $request->saran_penelitian_p1*5;
+    //         $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
+    //         $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
+    //         $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
+    //         // Update data
+    //         $penilaian->update([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'penguji2_id' => $user_id,
+    //             'judul' => $request->judul,
+    //             'sikap_penguji2' => $request->sikap_p2*5,
+    //             'mampu_menjelaskan_topik_penguji2' => $request->mampu_menjelaskan_topik_p2*5,
+    //             'mampu_menjelaskan_hasil_penguji2' => $request->mampu_menjelaskan_hasil_p2*15,
+    //             'simulasi_produk_penguji2' => $request->simulasi_produk_p2*20,
+    //             'pengujian_produk_penguji2' => $request->pengujian_produk_p2*10,
+    //             'produk_bermanfaat_penguji2' => $request->produk_bermanfaat_p2*15,
+    //             'kejelasan_proses_penguji2' => $request->kejelasan_proses_p2*10,
+    //             'susunan_laporan_penguji2' => $request->susunan_laporan_p2*5,
+    //             'isi_laporan_penguji2' => $request->isi_laporan_p2*10,
+    //             'kualitas_penulisan_penguji2' => $request->kualitas_penulisan_p2*5,
+    //             'total_nilai_penguji2'=> $total_nilai_p2,
+    //             'total_score_penguji'=> $nilaipenguji*0.75,
+    //             'total_score'=> $totalscore,
+    //         ]);
+    //     } else {
+    //         // Buat baru
+    //         PenilaianTugasAkhir::create([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'penguji2_id' => $user_id,
+    //             'nim' => $request->nim,
+    //             'judul' => $request->judul,
+    //             'sikap_penguji2' => $request->sikap_p2*5,
+    //             'mampu_menjelaskan_topik_penguji2' => $request->mampu_menjelaskan_topik_p2*5,
+    //             'mampu_menjelaskan_hasil_penguji2' => $request->mampu_menjelaskan_hasil_p2*15,
+    //             'simulasi_produk_penguji2' => $request->simulasi_produk_p2*20,
+    //             'pengujian_produk_penguji2' => $request->pengujian_produk_p2*10,
+    //             'produk_bermanfaat_penguji2' => $request->produk_bermanfaat_p2*15,
+    //             'kejelasan_proses_penguji2' => $request->kejelasan_proses_p2*10,
+    //             'susunan_laporan_penguji2' => $request->susunan_laporan_p2*5,
+    //             'isi_laporan_penguji2' => $request->isi_laporan_p2*10,
+    //             'kualitas_penulisan_penguji2' => $request->kualitas_penulisan_p2*5,
+    //             'total_nilai_penguji2'=> $total_nilai_p2,
+    //         ]);
+    //     }
+    //     return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
+    // }
+    // public function simpanPembimbing1(Request $request)
+    // {
+    //     $user_id = Auth::user()->id;
+    //     $total_nilai_p1 = $request->pelaksanaan_bimbingan_p1*5 +
+    //                 $request->daya_kritis_p1*10 +
+    //                 $request->sikap_p1*5 +
+    //                 $request->tujuan_utama_p1*5 +
+    //                 $request->topik_penelitian_p1*15 +
+    //                 $request->latar_belakang_p1*5+
+    //                 $request->teori_p1*5 +
+    //                 $request->desain_dan_perancangan_p1*15 +
+    //                 $request->hasil_p1*5 +
+    //                 $request->pengujian_p1*5 +
+    //                 $request->hasil_penelitian_p1*15+
+    //                 $request->kesimpulan_p1*5+
+    //                 $request->saran_penelitian_p1*5;
              
-        $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
-            ->first();
-        if ($penilaian) {
-            $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
-            $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
-            $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
-            // Update data
-            $penilaian->update([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'dosbing1_id' => $user_id,
-                'nim' => $request->nim,
-                'judul' => $request->judul,
-                'pelaksanaan_bimbingan_p1' => $request->pelaksanaan_bimbingan_p1*5,
-                'daya_kritis_p1' => $request->daya_kritis_p1*10,
-                'sikap_perilaku_p1' => $request->sikap_p1*5,
-                'tujuan_utama_p1' => $request->tujuan_utama_p1*5 ,
-                'topik_penelitian_p1' => $request->topik_penelitian_p1*15,
-                'latar_belakang_p1' => $request->latar_belakang_p1*5,
-                'teori_yang_dijelaskan_p1' => $request->teori_p1*5,
-                'desain_dan_perancangan_p1' => $request->desain_dan_perancangan_p1*15,
-                'hasil_p1' => $request->hasil_p1*5,
-                'pengujian_p1' => $request->pengujian_p1*5,
-                'kesimpulan_p1'=> $request->kesimpulan_p1*5,
-                'hasil_penelitian_p1' => $request->hasil_penelitian_p1*15,
-                'saran_penelitian_p1' => $request->saran_penelitian_p1*5,
-                'total_score_pembimbing_p1'=> $total_nilai_p1,
-                'total_score_pembimbing'=> $nilaipembimbing*0.25,
-                'total_score'=> $totalscore,
-            ]);
-        } else {
-            // Buat baru
-            PenilaianTugasAkhir::create([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'dosbing1_id' => $user_id,
-                'nim' => $request->nim,
-                'judul' => $request->judul,
-                'pelaksanaan_bimbingan_p1' => $request->pelaksanaan_bimbingan_p1*5,
-                'daya_kritis_p1' => $request->daya_kritis_p1*10,
-                'sikap_perilaku_p1' => $request->sikap_p1*5,
-                'tujuan_utama_p1' => $request->tujuan_utama_p1*5 ,
-                'topik_penelitian_p1' => $request->topik_penelitian_p1*15,
-                'latar_belakang_p1' => $request->latar_belakang_p1*5,
-                'teori_yang_dijelaskan_p1' => $request->teori_p1*5,
-                'desain_dan_perancangan_p1' => $request->desain_dan_perancangan_p1*15,
-                'hasil_p1' => $request->hasil_p1*5,
-                'pengujian_p1' => $request->pengujian_p1*5,
-                'kesimpulan_p1'=> $request->kesimpulan_p1*5,
-                'hasil_penelitian_p1' => $request->hasil_penelitian_p1*15,
-                'saran_penelitian_p1' => $request->saran_penelitian_p1*5,
-                'total_score_pembimbing_p1'=> $total_nilai_p1,
-            ]);
-        }
-        return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
-    }
-    public function simpanPembimbing2(Request $request)
-    {
-        $user_id = Auth::user()->id;
-        $total_nilai_p2 = $request->pelaksanaan_bimbingan_p2*5 +
-                    $request->daya_kritis_p2*10 +
-                    $request->sikap_p2*5 +
-                    $request->tujuan_utama_p2*5 +
-                    $request->topik_penelitian_p2*15 +
-                    $request->latar_belakang_p2*5+
-                    $request->teori_p2*5 +
-                    $request->desain_dan_perancangan_p2*15 +
-                    $request->hasil_p2*5 +
-                    $request->pengujian_p2*5 +
-                    $request->hasil_penelitian_p2*15+
-                    $request->kesimpulan_p2*5+
-                    $request->saran_penelitian_p2*5;
+    //     $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
+    //         ->first();
+    //     if ($penilaian) {
+    //         $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
+    //         $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
+    //         $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
+    //         // Update data
+    //         $penilaian->update([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'dosbing1_id' => $user_id,
+    //             'nim' => $request->nim,
+    //             'judul' => $request->judul,
+    //             'pelaksanaan_bimbingan_p1' => $request->pelaksanaan_bimbingan_p1*5,
+    //             'daya_kritis_p1' => $request->daya_kritis_p1*10,
+    //             'sikap_perilaku_p1' => $request->sikap_p1*5,
+    //             'tujuan_utama_p1' => $request->tujuan_utama_p1*5 ,
+    //             'topik_penelitian_p1' => $request->topik_penelitian_p1*15,
+    //             'latar_belakang_p1' => $request->latar_belakang_p1*5,
+    //             'teori_yang_dijelaskan_p1' => $request->teori_p1*5,
+    //             'desain_dan_perancangan_p1' => $request->desain_dan_perancangan_p1*15,
+    //             'hasil_p1' => $request->hasil_p1*5,
+    //             'pengujian_p1' => $request->pengujian_p1*5,
+    //             'kesimpulan_p1'=> $request->kesimpulan_p1*5,
+    //             'hasil_penelitian_p1' => $request->hasil_penelitian_p1*15,
+    //             'saran_penelitian_p1' => $request->saran_penelitian_p1*5,
+    //             'total_score_pembimbing_p1'=> $total_nilai_p1,
+    //             'total_score_pembimbing'=> $nilaipembimbing*0.25,
+    //             'total_score'=> $totalscore,
+    //         ]);
+    //     } else {
+    //         // Buat baru
+    //         PenilaianTugasAkhir::create([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'dosbing1_id' => $user_id,
+    //             'nim' => $request->nim,
+    //             'judul' => $request->judul,
+    //             'pelaksanaan_bimbingan_p1' => $request->pelaksanaan_bimbingan_p1*5,
+    //             'daya_kritis_p1' => $request->daya_kritis_p1*10,
+    //             'sikap_perilaku_p1' => $request->sikap_p1*5,
+    //             'tujuan_utama_p1' => $request->tujuan_utama_p1*5 ,
+    //             'topik_penelitian_p1' => $request->topik_penelitian_p1*15,
+    //             'latar_belakang_p1' => $request->latar_belakang_p1*5,
+    //             'teori_yang_dijelaskan_p1' => $request->teori_p1*5,
+    //             'desain_dan_perancangan_p1' => $request->desain_dan_perancangan_p1*15,
+    //             'hasil_p1' => $request->hasil_p1*5,
+    //             'pengujian_p1' => $request->pengujian_p1*5,
+    //             'kesimpulan_p1'=> $request->kesimpulan_p1*5,
+    //             'hasil_penelitian_p1' => $request->hasil_penelitian_p1*15,
+    //             'saran_penelitian_p1' => $request->saran_penelitian_p1*5,
+    //             'total_score_pembimbing_p1'=> $total_nilai_p1,
+    //         ]);
+    //     }
+    //     return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
+    // }
+    // public function simpanPembimbing2(Request $request)
+    // {
+    //     $user_id = Auth::user()->id;
+    //     $total_nilai_p2 = $request->pelaksanaan_bimbingan_p2*5 +
+    //                 $request->daya_kritis_p2*10 +
+    //                 $request->sikap_p2*5 +
+    //                 $request->tujuan_utama_p2*5 +
+    //                 $request->topik_penelitian_p2*15 +
+    //                 $request->latar_belakang_p2*5+
+    //                 $request->teori_p2*5 +
+    //                 $request->desain_dan_perancangan_p2*15 +
+    //                 $request->hasil_p2*5 +
+    //                 $request->pengujian_p2*5 +
+    //                 $request->hasil_penelitian_p2*15+
+    //                 $request->kesimpulan_p2*5+
+    //                 $request->saran_penelitian_p2*5;
              
-        $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
-            ->first();
-        if ($penilaian) {
-            $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
-            $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
-            $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
-            // Update data
-            $penilaian->update([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'dosbing2_id' => $user_id,
-                'nim' => $request->nim,
-                'judul' => $request->judul,
-                'pelaksanaan_bimbingan_p2' => $request->pelaksanaan_bimbingan_p2*5,
-                'daya_kritis_p2' => $request->daya_kritis_p2*10,
-                'sikap_perilaku_p2' => $request->sikap_p2*5,
-                'tujuan_utama_p2' => $request->tujuan_utama_p2*5 ,
-                'topik_penelitian_p2' => $request->topik_penelitian_p2*15,
-                'latar_belakang_p2' => $request->latar_belakang_p2*5,
-                'teori_yang_dijelaskan_p2' => $request->teori_p2*5,
-                'desain_dan_perancangan_p2' => $request->desain_dan_perancangan_p2*15,
-                'hasil_p2' => $request->hasil_p2*5,
-                'pengujian_p2' => $request->pengujian_p2*5,
-                'kesimpulan_p2'=> $request->kesimpulan_p2*5,
-                'hasil_penelitian_p2' => $request->hasil_penelitian_p2*15,
-                'saran_penelitian_p2' => $request->saran_penelitian_p2*5,
-                'total_score_pembimbing_p2'=> $total_nilai_p2,
-                'total_score'=> $totalscore,
-                'total_score_pembimbing'=> $nilaipembimbing*0.25,        
-            ]);
+    //     $penilaian = PenilaianTugasAkhir::where('nim', $request->nim)
+    //         ->first();
+    //     if ($penilaian) {
+    //         $nilaipenguji = $penilaian->total_nilai_kp + $penilaian->total_nilai_penguji1 + $penilaian->total_nilai_penguji2;
+    //         $nilaipembimbing = $penilaian->total_score_pembimbing_p1 + $penilaian->total_score_pembimbing_p2;
+    //         $totalscore = $nilaipenguji*0.75 + $nilaipembimbing*0.25;
+    //         // Update data
+    //         $penilaian->update([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'dosbing2_id' => $user_id,
+    //             'nim' => $request->nim,
+    //             'judul' => $request->judul,
+    //             'pelaksanaan_bimbingan_p2' => $request->pelaksanaan_bimbingan_p2*5,
+    //             'daya_kritis_p2' => $request->daya_kritis_p2*10,
+    //             'sikap_perilaku_p2' => $request->sikap_p2*5,
+    //             'tujuan_utama_p2' => $request->tujuan_utama_p2*5 ,
+    //             'topik_penelitian_p2' => $request->topik_penelitian_p2*15,
+    //             'latar_belakang_p2' => $request->latar_belakang_p2*5,
+    //             'teori_yang_dijelaskan_p2' => $request->teori_p2*5,
+    //             'desain_dan_perancangan_p2' => $request->desain_dan_perancangan_p2*15,
+    //             'hasil_p2' => $request->hasil_p2*5,
+    //             'pengujian_p2' => $request->pengujian_p2*5,
+    //             'kesimpulan_p2'=> $request->kesimpulan_p2*5,
+    //             'hasil_penelitian_p2' => $request->hasil_penelitian_p2*15,
+    //             'saran_penelitian_p2' => $request->saran_penelitian_p2*5,
+    //             'total_score_pembimbing_p2'=> $total_nilai_p2,
+    //             'total_score'=> $totalscore,
+    //             'total_score_pembimbing'=> $nilaipembimbing*0.25,        
+    //         ]);
+    //     } else {
+    //         // Buat baru
+    //         PenilaianTugasAkhir::create([
+    //             'nama_mahasiswa' => $request->nama_mahasiswa,
+    //             'dosbing2_id' => $user_id,
+    //             'nim' => $request->nim,
+    //             'judul' => $request->judul,
+    //             'pelaksanaan_bimbingan_p2' => $request->pelaksanaan_bimbingan_p2*5,
+    //             'daya_kritis_p2' => $request->daya_kritis_p2*10,
+    //             'sikap_perilaku_p2' => $request->sikap_p2*5,
+    //             'tujuan_utama_p2' => $request->tujuan_utama_p2*5 ,
+    //             'topik_penelitian_p2' => $request->topik_penelitian_p2*15,
+    //             'latar_belakang_p2' => $request->latar_belakang_p2*5,
+    //             'teori_yang_dijelaskan_p2' => $request->teori_p2*5,
+    //             'desain_dan_perancangan_p2' => $request->desain_dan_perancangan_p2*15,
+    //             'hasil_p2' => $request->hasil_p2*5,
+    //             'pengujian_p2' => $request->pengujian_p2*5,
+    //             'kesimpulan_p2'=> $request->kesimpulan_p2*5,
+    //             'hasil_penelitian_p2' => $request->hasil_penelitian_p2*15,
+    //             'saran_penelitian_p2' => $request->saran_penelitian_p2*5,
+    //             'total_score_pembimbing_p2'=> $total_nilai_p2,
+    //         ]);
+    //     }
+    //     return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
+    // }
+    // public function storePenilaian(Request $request)
+    // {
+    //     $dosenId = auth()->id();
+    //     $rolePembimbing = $request->input('peran_pembimbing'); // ⚠️ Blade kirim "peran_pembimbing" bukan "role"
+    //     $mahasiswaId = $request->input('mahasiswa_id');
+    //     $nilaiInput = $request->input('nilai', []); // array nilai mentah
+    //     $bobotInput = $request->input('bobot', []); // array bobot
+
+    //     $total = 0;
+    //     $totalBobot = 0;
+
+    //     $penilaian = PenilaianDosenPembimbing::firstOrNew([
+    //         'mahasiswa_id' => $mahasiswaId,
+    //     ]);
+
+    //     $i = 1;
+    //     foreach ($nilaiInput as $kritId => $nilai) {
+    //         $bobot = isset($bobotInput[$kritId]) ? (float) $bobotInput[$kritId] : 0;
+
+    //         // ✅ nilai sudah dikali bobot
+    //         $nilaiDenganBobot = $nilai * $bobot;
+
+    //         if ($rolePembimbing == 1) {
+    //             $kolom = "nilai{$i}_dosbing1";
+    //             $penilaian->dosbing1_id = $dosenId;
+    //             $penilaian->$kolom = $nilaiDenganBobot;
+    //         } elseif ($rolePembimbing == 2) {
+    //             $kolom = "nilai{$i}_dosbing2";
+    //             $penilaian->dosbing2_id = $dosenId;
+    //             $penilaian->$kolom = $nilaiDenganBobot;
+    //         }
+
+    //         $total += $nilaiDenganBobot;
+    //         $totalBobot += $bobot;
+    //         $i++;
+    //     }
+
+    //     if ($totalBobot > 0) {
+    //         $hasil = $total / $totalBobot;
+    //         if ($rolePembimbing == 1) {
+    //             $penilaian->total_dosbing1 = $hasil;
+    //         } elseif ($rolePembimbing == 2) {
+    //             $penilaian->total_dosbing2 = $hasil;
+    //         }
+    //     }
+
+    //     if ($penilaian->total_dosbing1 && $penilaian->total_dosbing2) {
+    //         $penilaian->rata_rata = ($penilaian->total_dosbing1 + $penilaian->total_dosbing2) / 2;
+    //     }
+
+    //     $penilaian->save();
+
+    //     return redirect()->back()->with('success', 'Penilaian berhasil disimpan');
+    // }
+
+    public function edit($mahasiswaId)
+    {
+        $dosenId = auth()->id();
+        $penilaian = PenilaianDosenPembimbing::where('mahasiswa_id', $mahasiswaId)->firstOrFail();
+
+        // Cek apakah dia pembimbing 1 atau 2
+        $peran = null;
+        if ($penilaian->dosbing1_id == $dosenId) {
+            $peran = 1;
+        } elseif ($penilaian->dosbing2_id == $dosenId) {
+            $peran = 2;
         } else {
-            // Buat baru
-            PenilaianTugasAkhir::create([
-                'nama_mahasiswa' => $request->nama_mahasiswa,
-                'dosbing2_id' => $user_id,
-                'nim' => $request->nim,
-                'judul' => $request->judul,
-                'pelaksanaan_bimbingan_p2' => $request->pelaksanaan_bimbingan_p2*5,
-                'daya_kritis_p2' => $request->daya_kritis_p2*10,
-                'sikap_perilaku_p2' => $request->sikap_p2*5,
-                'tujuan_utama_p2' => $request->tujuan_utama_p2*5 ,
-                'topik_penelitian_p2' => $request->topik_penelitian_p2*15,
-                'latar_belakang_p2' => $request->latar_belakang_p2*5,
-                'teori_yang_dijelaskan_p2' => $request->teori_p2*5,
-                'desain_dan_perancangan_p2' => $request->desain_dan_perancangan_p2*15,
-                'hasil_p2' => $request->hasil_p2*5,
-                'pengujian_p2' => $request->pengujian_p2*5,
-                'kesimpulan_p2'=> $request->kesimpulan_p2*5,
-                'hasil_penelitian_p2' => $request->hasil_penelitian_p2*15,
-                'saran_penelitian_p2' => $request->saran_penelitian_p2*5,
-                'total_score_pembimbing_p2'=> $total_nilai_p2,
-            ]);
+            abort(403, 'Anda bukan pembimbing mahasiswa ini.');
         }
-        return redirect()->back()->with('success', 'Data penilaian berhasil disimpan.');
+
+        // Ambil nilai sesuai peran
+        $nilaiArray = [];
+        for ($i = 1; $i <= 15; $i++) {
+            $field = "nilai{$i}_dosbing{$peran}";
+            $nilaiArray[$i] = $penilaian->$field;
+        }
+
+        return view('penilaian.edit', compact('penilaian', 'nilaiArray', 'peran'));
     }
+    // public function update(Request $request, $mahasiswaId)
+    // {
+    //     $request->validate([
+    //         'unsur_yang_dinilai' => 'required|string|max:255',
+    //         'nilai' => 'required|numeric|min:0|max:100',
+    //     ]);
+
+    //     $penilaian = PenilaianDosenPembimbing::where('mahasiswa_id', $mahasiswaId)
+    //         ->where('unsur_yang_dinilai', $request->unsur_yang_dinilai)
+    //         ->firstOrFail();
+
+    //     $penilaian->update([
+    //         'nilai' => $request->nilai,
+    //     ]);
+
+    //     return redirect()->back()->with('success', 'Penilaian berhasil diperbarui');
+    // }
+    public function getPenilaian($mahasiswaId, $peran)
+    {
+        $penilaian = PenilaianDosenPembimbing::where('mahasiswa_id', $mahasiswaId)->first();
+
+        if (!$penilaian) {
+            return response()->json([]);
+        }
+
+        $data = [];
+        for ($i = 1; $i <= 15; $i++) {
+            $field = "nilai{$i}_dosbing{$peran}";
+            $data[$i] = $penilaian->$field ?? null;
+        }
+
+        return response()->json($data);
+    }
+    public function getKriteriaEdit($penilaianId, Request $request)
+    {
+        $jenis = $request->query('jenis');
+
+        switch ($jenis) {
+            case 'ilmiah':
+                $kriteria = PenilaianBimbinganIlmiah::all();
+                break;
+            case 'hki':
+                $kriteria = PenilaianBimbinganHKI::all();
+                break;
+            default:
+                $kriteria = PenilaianBimbinganSkripsi::all();
+                break;
+        }
+
+        // ambil nilai lama (detail penilaian)
+        $detail = PenilaianDosenPembimbing::where('penilaian_id', $penilaianId)->get();
+
+        $nilai = [];
+        foreach ($detail as $d) {
+            $nilai[$d->kriteria_id] = $d->nilai_asli ?? $d->nilai; 
+            // kalau di DB disimpan hasil perkalian, pakai field asli
+        }
+
+        return response()->json([
+            'kriteria' => $kriteria,
+            'nilai'    => $nilai
+        ]);
+    }
+
+    /**
+     * Update nilai penilaian
+     */
+    public function update(Request $request, $id)
+    {
+        $penilaian = PenilaianDosenPembimbing::findOrFail($id);
+
+        $total = 0;
+
+        foreach ($request->nilai as $kriteriaId => $nilai) {
+            $bobot = $request->bobot[$kriteriaId] ?? 1;
+            $skor = $nilai * $bobot;
+            $total += $skor;
+
+            // update atau insert detail
+            PenilaianDosenPembimbing::updateOrCreate(
+                [
+                    'penilaian_id' => $penilaian->id,
+                    'kriteria_id'  => $kriteriaId,
+                ],
+                [
+                    'bobot'       => $bobot,
+                    'nilai_asli'  => $nilai,
+                    'nilai'       => $skor,
+                ]
+            );
+        }
+
+        // simpan total sesuai pembimbing
+        if ($request->penguji == 1) {
+            $penilaian->total_dosbing1 = $total;
+        } elseif ($request->penguji == 2) {
+            $penilaian->total_dosbing2 = $total;
+        }
+        $penilaian->save();
+
+        return redirect()->back()->with('success', 'Penilaian berhasil diperbarui');
+    }
+
+
 }

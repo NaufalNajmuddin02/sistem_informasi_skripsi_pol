@@ -57,11 +57,47 @@
                     @endforelse
                 </tbody>
             </table>
-
-            <!-- Pagination -->
             <div class="d-flex justify-content-center">
                 {{ $pendaftars->appends(['search' => request('search')])->links() }}
             </div>
+
+                        <!-- Tabel Mahasiswa Belum Daftar -->
+            <div class="mt-5">
+                <h3 class="mb-3">Mahasiswa yang Belum Mendaftar Ujian TA</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-danger">
+                            <tr>
+                                <th>NIM</th>
+                                <th>Nama</th>
+                                <th>Email/No. HP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($belumDaftar as $mhs)
+                                <tr>
+                                    <td>{{ $mhs->nim }}</td>
+                                    <td>{{ $mhs->nama }}</td>
+                                    <td>{{ $mhs->no_hp }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">Semua mahasiswa sudah mendaftar ujian TA.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination Belum Daftar -->
+                    <div class="d-flex justify-content-center">
+                        {{ $belumDaftar->links() }}
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Pagination -->
+            
         </div>
     </div>
 

@@ -13,20 +13,32 @@ class PendaftaranSidangTAController extends Controller
     {
         $search = $request->input('search');
 
+        // Data mahasiswa yang sudah daftar
         $query = DB::table('table_pendaftaran_t_a');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%$search%")
-                  ->orWhere('nim', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%");
+                ->orWhere('nim', 'like', "%$search%")
+                ->orWhere('email', 'like', "%$search%");
             });
         }
 
         $pendaftars = $query->paginate(10);
 
-        return view('admin.sidangta.index', compact('pendaftars', 'search'));
+        // Data mahasiswa yang BELUM daftar
+        $sudahDaftarNIM = DB::table('table_pendaftaran_t_a')->pluck('nim');
+
+        $belumDaftar = DB::table('users')
+            ->where('role', 'mahasiswa')
+            ->whereNotIn('nim', $sudahDaftarNIM)
+            ->select('nim', 'username as nama', 'no_hp') // sesuaikan kolom
+            ->paginate(10); // gunakan paginate
+
+        return view('admin.sidangta.index', compact('pendaftars', 'search', 'belumDaftar'));
     }
+
+
 
     public function edit($id) 
     {
@@ -37,7 +49,6 @@ class PendaftaranSidangTAController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'status_naskah' => 'required',
             'status_hasil_plagiasi' => 'required',
             'status_bukti_pembayaran' => 'required',
             'status_skor_toefl' => 'required',

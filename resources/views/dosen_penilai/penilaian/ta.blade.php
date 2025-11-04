@@ -1,340 +1,329 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTA - Penilaian</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <style>
-    html, body {
-        height: 100%;
-        margin: 0;
-    }
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SISTA - Penilaian Penguji</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    </head>
+    <body class="d-flex flex-column min-vh-100">
 
-    body {
-        display: flex;
-        flex-direction: column;
-    }
-
-    main {
-        flex: 1;
-    }
-</style>
-</head>
-<body>
     @include('layouts.navbar-penilai')
-    <!-- Main Content -->
+
     <div class="container my-4">
-        <div class="d-flex align-items-center mb-3">
-            <h1 class="me-3 mb-0">Penilaian Penguji</h1>
-        </div>
+        <h3>Daftar Mahasiswa Ujian (Sebagai Penguji)</h3>
+
+        <!-- Dropdown Pilihan Peran Penguji -->
         <div class="mb-3">
-            <label class="form-label">Sebagai:</label>
-            <select name="penguji" class="form-select" id="selectPenguji" required>
-                <option value="">-- Pilih Posisi --</option>
-                <option value="1">Ketua Penguji</option>
+            <label for="selectPenguji" class="form-label">Pilih Peran:</label>
+            <select id="selectPenguji" class="form-select w-auto">
+                <option value="1" selected>Ketua Penguji</option>
                 <option value="2">Penguji 1</option>
                 <option value="3">Penguji 2</option>
             </select>
         </div>
 
-        <br>
-    @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form method="POST" action="{{ route('dosen-penilai.ketua') }}" id="formPenilai1" style="display: none;">
-
-        <h2>Form Ketua Penguji </h2>
-    @csrf
+         <!-- SINGLE Search Input (unik) -->
         <div class="mb-3">
-            <label class="form-label">Nama Mahasiswa:</label>
-            <select id="nama_mahasiswa_ketua" name="nama_mahasiswa" class="form-control" required>
-                <option value="" disabled selected>-- Pilih Mahasiswa --</option>
-                @foreach($mahasiswa as $mhs)
-                    <option 
-                        value="{{ $mhs->nama }}" 
-                        data-nim="{{ $mhs->nim }}" 
-                        data-judul="{{ $mhs->judul_skripsi }}">
-                        {{ $mhs->nama }}
-                    </option>
-                @endforeach
-            </select>
+            <label class="form-label mb-0 d-block">&nbsp;</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="Cari nama atau NIM mahasiswa...">
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">NIM:</label>
-            <input type="text" id="nim_ketua" name="nim" class="form-control" required readonly>
+        <!-- Tabel Ketua Penguji -->
+        <div id="tableKetua">
+            <h4 class="mt-4">Sebagai Ketua Penguji</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-primary">
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Mahasiswa</th>
+                        <th>NIM</th>
+                        <th>Judul</th>
+                        <th>Nilai</th>
+                        <th>Nilai Akhir</th>
+                        <th>Aksi</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($ketuaPenguji as $index => $jadwal)
+                        <tr>
+                            <td>{{ $index+1 }}</td>
+                            <td>{{ $jadwal->user->username }}</td>
+                            <td>{{ $jadwal->nim }}</td>
+                            <td>{{ $jadwal->judul }}</td>
+                            <td>{{ $jadwal->total_ketua/5 }}</td>
+                            <td>{{ number_format($jadwal->nilai_akhir, 2) }}</td>
+                            <td>
+                                <!-- Tombol Nilai -->
+                                <a href="#" 
+                                class="btn btn-primary btn-sm btn-nilai"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalPenilaian"
+                                data-mahasiswa-id="{{ $jadwal->user->id }}"
+                                data-nim="{{ $jadwal->nim }}"
+                                data-peran="1">
+                                <i class="fas fa-edit"></i> Nilai
+                                </a>
+
+
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="text-center">Tidak ada jadwal</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Judul Tugas Akhir:</label>
-            <input type="text" id="judul_ketua" name="judul" class="form-control" required readonly>
-        </div>
-        <h3>1. Presentasi</h3>
-        <div class="mb-3">
-            <label class="form-label">Sikap, komunikasi, dan penampilan. <b> 5 (Bobot)</b></label>
-            <input type="number" name="sikap_kp" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mampu menjelaskan alasan pengambilan topik penelitian. <b> 5 (Bobot)</b></label>
-            <input type="number" name="mampu_menjelaskan_topik_kp" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mampu menjelaskan setiap bagian/menu produk atau hasil. <b> 15 (Bobot)</b></label>
-            <input type="number" name="mampu_menjelaskan_hasil_kp" class="form-control" required>
-        </div>
-        <h3>2. Produk</h3>
-        <div class="mb-3">
-            <label class="form-label">Produk dapat disimulasikan dan atau telah diimplementasikan. <b> 20 (Bobot)</b></label>
-            <input type="number" name="simulasi_produk_kp" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Produk telah diuji dengan baik .<b> 10 (Bobot)</b></label>
-            <input type="number" name="pengujian_produk_kp" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Produk bermanfaat dan mampu menyelesaikan masalah(solutif). <b> 15 (Bobot)</b></label>
-            <input type="number" name="produk_bermanfaat_kp" class="form-control" required>
-        </div>
-         <div class="mb-3">
-            <label class="form-label">Kejelasan proses bisnis dan komplesitas produk. <b> 10 (Bobot)</b></label>
-            <input type="number" name="kejelasan_proses_kp" class="form-control" required>
-        </div>
-        <h3>3. Laporan</h3>
-        <div class="mb-3">
-            <label class="form-label">Susunan laporan sesuai format panduan. <b> 5 (Bobot)</b></label>
-            <input type="number" name="susunan_laporan_kp" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Isi laporan sesuai dengan produk penelitian. <b> 10 (Bobot)</b></label>
-            <input type="number" name="isi_laporan_kp" class="form-control" required>
-        </div>
-         <div class="mb-3">
-            <label class="form-label">Kualitas penulisan (gramatika, ejaan, sitasi, penulisan pustaka, dll). <b> 5 (Bobot)</b></label>
-            <input type="number" name="kualitas_penulisan_kp" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Status Sidang:</label>
-            <select name="status_sidang_kp" class="form-control" required>
-                <option value="">-- Pilih Status --</option>
-                <option value="lolos">Lolos</option>
-                <option value="tidak_lolos">Tidak Lolos</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Simpan</button>
-    </form>       
-    <form method="POST" action="{{ route('dosen-penilai.penguji1') }}" id="formPenilai2" style="display: none;">
-    <h2>Form Penguji 1</h2>
-    @csrf
-        <div class="mb-3">
-            <label class="form-label">Nama Mahasiswa:</label>
-            <select id="nama_mahasiswa_penguji1" name="nama_mahasiswa" class="form-control" required>
-                <option value="" disabled selected>-- Pilih Mahasiswa --</option>
-                @foreach($mahasiswa as $mhs)
-                    <option 
-                        value="{{ $mhs->nama }}" 
-                        data-nim="{{ $mhs->nim }}" 
-                        data-judul="{{ $mhs->judul_skripsi }}">
-                        {{ $mhs->nama }}
-                    </option>
-                @endforeach
-            </select>
+        <!-- Tabel Penguji 1 -->
+        <div id="tablePenguji1" style="display:none;">
+            <h4 class="mt-4">Sebagai Penguji 1</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-primary">
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Mahasiswa</th>
+                        <th>NIM</th>
+                        <th>Judul</th>
+                        <th>Nilai</th>
+                        <th>Aksi</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($penguji1 as $index => $jadwal)
+                        <tr>
+                            <td>{{ $index+1 }}</td>
+                            <td>{{ $jadwal->user->username }}</td>
+                            <td>{{ $jadwal->nim }}</td>
+                            <td>{{ $jadwal->judul }}</td>
+                            <td>{{ $jadwal->total_penguji1/5 }}</td>
+                            <td>
+                                <!-- Tombol Nilai -->
+                                <a href="#" 
+                                class="btn btn-primary btn-sm btn-nilai"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalPenilaian"
+                                data-mahasiswa-id="{{ $jadwal->user->id }}"
+                                data-nim="{{ $jadwal->nim }}"
+                                data-peran="2">
+                                <i class="fas fa-edit"></i> Nilai
+                                </a>
+
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="text-center">Tidak ada jadwal</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">NIM:</label>
-            <input type="text" id="nim_penguji1" name="nim" class="form-control" required readonly>
-        </div>
+        <!-- Tabel Penguji 2 -->
+        <div id="tablePenguji2" style="display:none;">
+            <h4 class="mt-4">Sebagai Penguji 2</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-primary">
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Mahasiswa</th>
+                        <th>NIM</th>
+                        <th>Judul</th>
+                        <th>Nilai</th>
+                        <th>Aksi</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($penguji2 as $index => $jadwal)
+                        <tr>
+                            <td>{{ $index+1 }}</td>
+                            <td>{{ $jadwal->user->username }}</td>
+                            <td>{{ $jadwal->nim }}</td>
+                            <td>{{ $jadwal->judul }}</td>
+                            <td>{{ $jadwal->total_penguji2/5 }}</td>
+                            <td>
+                                <!-- Tombol Nilai -->
+                                <a href="#" 
+                                class="btn btn-primary btn-sm btn-nilai"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalPenilaian"
+                                data-mahasiswa-id="{{ $jadwal->user->id }}"
+                                data-nim="{{ $jadwal->nim }}"
+                                data-peran="3">
+                                <i class="fas fa-edit"></i> Nilai
+                                </a>
 
-        <div class="mb-3">
-            <label class="form-label">Judul Tugas Akhir:</label>
-            <input type="text" id="judul_penguji1" name="judul" class="form-control" required readonly>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="text-center">Tidak ada jadwal</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <h3>1. Presentasi</h3>
-        <div class="mb-3">
-            <label class="form-label">Sikap, komunikasi, dan penampilan. <b> 5 (Bobot)</b></label>
-            <input type="text" name="sikap_p1" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mampu menjelaskan alasan pengambilan topik penelitian. <b> 5 (Bobot)</b></label>
-            <input type="text" name="mampu_menjelaskan_topik_p1" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mampu menjelaskan setiap bagian/menu produk atau hasil. <b> 15 (Bobot)</b></label>
-            <input type="text" name="mampu_menjelaskan_hasil_p1" class="form-control" required>
-        </div>
-        <h3>2. Produk</h3>
-        <div class="mb-3">
-            <label class="form-label">Produk dapat disimulasikan dan atau telah diimplementasikan. <b> 20 (Bobot)</b></label>
-            <input type="text" name="simulasi_produk_p1" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Produk telah diuji dengan baik .<b> 10 (Bobot)</b></label>
-            <input type="text" name="pengujian_produk_p1" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Produk bermanfaat dan mampu menyelesaikan masalah(solutif). <b> 15 (Bobot)</b></label>
-            <input type="text" name="produk_bermanfaat_p1" class="form-control" required>
-        </div>
-         <div class="mb-3">
-            <label class="form-label">Kejelasan proses bisnis dan komplesitas produk. <b> 10 (Bobot)</b></label>
-            <input type="text" name="kejelasan_proses_p1" class="form-control" required>
-        </div>
-        <h3>3. Laporan</h3>
-        <div class="mb-3">
-            <label class="form-label">Susunan laporan sesuai format panduan. <b> 5 (Bobot)</b></label>
-            <input type="text" name="susunan_laporan_p1" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Isi laporan sesuai dengan produk penelitian. <b> 10 (Bobot)</b></label>
-            <input type="text" name="isi_laporan_p1" class="form-control" required>
-        </div>
-         <div class="mb-3">
-            <label class="form-label">Kualitas penulisan (gramatika, ejaan, sitasi, penulisan pustaka, dll). <b> 5 (Bobot)</b></label>
-            <input type="text" name="kualitas_penulisan_p1" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Simpan</button>
-    </form>       
-
-    <form method="POST" action="{{ route('dosen-penilai.penguji2') }}" id="formPenilai3" style="display: none;">
-        <h2>Form Penguji 2</h2>
-    @csrf
-        <div class="mb-3">
-            <label class="form-label">Nama Mahasiswa:</label>
-            <select id="nama_mahasiswa_penguji2" name="nama_mahasiswa" class="form-control" required>
-                <option value="" disabled selected>-- Pilih Mahasiswa --</option>
-                @foreach($mahasiswa as $mhs)
-                    <option 
-                        value="{{ $mhs->nama }}" 
-                        data-nim="{{ $mhs->nim }}" 
-                        data-judul="{{ $mhs->judul_skripsi }}">
-                        {{ $mhs->nama }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">NIM:</label>
-            <input type="text" id="nim_penguji2" name="nim" class="form-control" required readonly>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Judul Tugas Akhir:</label>
-            <input type="text" id="judul_penguji2" name="judul" class="form-control" required readonly>
-        </div>
-        <h3>1. Presentasi</h3>
-        <div class="mb-3">
-            <label class="form-label">Sikap, komunikasi, dan penampilan. <b> 5 (Bobot)</b></label>
-            <input type="text" name="sikap_p2" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mampu menjelaskan alasan pengambilan topik penelitian. <b> 5 (Bobot)</b></label>
-            <input type="text" name="mampu_menjelaskan_topik_p2" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mampu menjelaskan setiap bagian/menu produk atau hasil. <b> 15 (Bobot)</b></label>
-            <input type="text" name="mampu_menjelaskan_hasil_p2" class="form-control" required>
-        </div>
-        <h3>2. Produk</h3>
-        <div class="mb-3">
-            <label class="form-label">Produk dapat disimulasikan dan atau telah diimplementasikan. <b> 20 (Bobot)</b></label>
-            <input type="text" name="simulasi_produk_p2" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Produk telah diuji dengan baik .<b> 10 (Bobot)</b></label>
-            <input type="text" name="pengujian_produk_p2" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Produk bermanfaat dan mampu menyelesaikan masalah(solutif). <b> 15 (Bobot)</b></label>
-            <input type="text" name="produk_bermanfaat_p2" class="form-control" required>
-        </div>
-         <div class="mb-3">
-            <label class="form-label">Kejelasan proses bisnis dan komplesitas produk. <b> 10 (Bobot)</b></label>
-            <input type="text" name="kejelasan_proses_p2" class="form-control" required>
-        </div>
-        <h3>3. Laporan</h3>
-        <div class="mb-3">
-            <label class="form-label">Susunan laporan sesuai format panduan. <b> 5 (Bobot)</b></label>
-            <input type="text" name="susunan_laporan_p2" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Isi laporan sesuai dengan produk penelitian. <b> 10 (Bobot)</b></label>
-            <input type="text" name="isi_laporan_p2" class="form-control" required>
-        </div>
-         <div class="mb-3">
-            <label class="form-label">Kualitas penulisan (gramatika, ejaan, sitasi, penulisan pustaka, dll). <b> 5 (Bobot)</b></label>
-            <input type="text" name="kualitas_penulisan_p2" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Simpan</button>
-    </form>    
     </div>
 
-    
+    <!-- Modal Penilaian -->
+    <div class="modal fade" id="modalPenilaian" tabindex="-1" aria-labelledby="modalPenilaianLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> 
+        <div class="modal-content">
+        <form method="POST" action="{{ route('penilaian.simpan.sidangpenilai') }}">
+            @csrf
+            <input type="hidden" name="mahasiswa_id" id="mahasiswaId">
+            <input type="hidden" name="peran_penguji" id="peranPenguji">
+            <div class="modal-header">
+            <h5 class="modal-title" id="modalPenilaianLabel">Form Penilaian</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
 
-    <!-- Bootstrap JS and Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-     <script>
-    document.getElementById('selectPenguji').addEventListener('change', function() {
-        const value = this.value;
+            <div class="mb-3">
+                <label for="jenisSidang" class="form-label">Jenis Sidang</label>
+                <select id="jenisSidang" name="jenis_sidang" class="form-select">
+                <option value="hki">HKI</option>
+                <option value="ilmiah">Ilmiah</option>
+                <option value="skripsi">Skripsi</option>
+                </select>
+            </div>
 
-        // Sembunyikan semua form terlebih dahulu
-        document.getElementById('formPenilai1').style.display = 'none';
-        document.getElementById('formPenilai2').style.display = 'none';
-        document.getElementById('formPenilai3').style.display = 'none';
+            <!-- Tempat muncul kriteria -->
+            <div id="kriteriaContainer"></div>
+            <div class="mb-3" id="statusKelulusanContainer" style="display:none;">
+                <label for="statusKelulusan" class="form-label">Status Kelulusan</label>
+                <select id="statusKelulusan" name="status_kelulusan" class="form-select">
+                    <option value="lulus">Lulus</option>
+                    <option value="belum lulus">Belum Lulus</option>
+                </select>
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Simpan Nilai</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
 
-        // Tampilkan form sesuai pilihan
-        if (value === '1') {
-            document.getElementById('formPenilai1').style.display = 'block';
-        } else if (value === '2') {
-            document.getElementById('formPenilai2').style.display = 'block';
-        } else if (value === '3') {
-            document.getElementById('formPenilai3').style.display = 'block';
+
+    @include('layouts.footer')
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+    $(document).ready(function(){
+        // Switch tabel penguji
+        $('#selectPenguji').on('change', function(){
+            let val = $(this).val();
+            $('#tableKetua').hide();
+            $('#tablePenguji1').hide();
+            $('#tablePenguji2').hide();
+
+            if(val === '1'){
+                $('#tableKetua').show();
+            } else if(val === '2'){
+                $('#tablePenguji1').show();
+            } else {
+                $('#tablePenguji2').show();
+            }
+        });
+    });
+    </script>
+    <script>
+    $(document).ready(function(){
+        // Saat dropdown jenis sidang diubah
+        $('#jenisSidang').on('change', function(){
+            let jenis = $(this).val();
+            $.get("{{ route('penilaian.kriteria.sidangpenilai') }}", { jenis: jenis }, function(data){
+                let html = `
+                    <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                        <th>Unsur Yang Dinilai</th>
+                        <th>Kriteria</th>
+                        <th>Bobot</th>
+                        <th>Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                data.forEach(function(item, index){
+                    html += `
+                    <tr>
+                        <td>${item.unsur_yang_dinilai}</td>
+                        <td>${item.kriteria}</td>
+                        <td>
+                        ${item.bobot}
+                        <input type="hidden" name="bobot[${index}]" value="${item.bobot}">
+                        </td>
+                        <td>
+                        <select name="nilai[${index}]" class="form-select">
+                            ${[1,2,3,4,5].map(val => `<option value="${val}">${val}</option>`).join('')}
+                        </select>
+                        </td>
+                    </tr>`;
+                });
+
+                html += `</tbody></table>`;
+                $('#kriteriaContainer').html(html);
+            });
+        });
+
+        // Trigger default saat modal dibuka
+        $('#modalPenilaian').on('shown.bs.modal', function(){
+            $('#jenisSidang').trigger('change');
+        });
+    });
+      $(document).on('click', '.btn-nilai', function(){
+        let mahasiswaId = $(this).data('mahasiswa-id');
+        let peran = $(this).data('peran');
+
+        $('#mahasiswaId').val(mahasiswaId);
+        $('#peranPenguji').val(peran);
+
+        if(peran == 1){
+            $('#statusKelulusanContainer').show();
+        } else {
+            $('#statusKelulusanContainer').hide();
         }
     });
-</script>
-<script>
-document.getElementById('nama_mahasiswa_ketua').addEventListener('change', function() {
-    const opt = this.options[this.selectedIndex];
-    document.getElementById('nim_ketua').value = opt.dataset.nim || '';
-    document.getElementById('judul_ketua').value = opt.dataset.judul || '';
-});
-</script>
 
-<!-- Penguji 1 -->
-<script>
-document.getElementById('nama_mahasiswa_penguji1').addEventListener('change', function() {
-    const opt = this.options[this.selectedIndex];
-    document.getElementById('nim_penguji1').value = opt.dataset.nim || '';
-    document.getElementById('judul_penguji1').value = opt.dataset.judul || '';
-});
-</script>
-
-<!-- Penguji 2 -->
-<script>
-document.getElementById('nama_mahasiswa_penguji2').addEventListener('change', function() {
-    const opt = this.options[this.selectedIndex];
-    document.getElementById('nim_penguji2').value = opt.dataset.nim || '';
-    document.getElementById('judul_penguji2').value = opt.dataset.judul || '';
-});
-</script>
 
     </script>
 
+<script>
+$(document).ready(function(){
+    $('#searchInput').on('keyup', function(){
+        let filter = $(this).val().toLowerCase();
 
-@include('layouts.footer')
-</body>
-</html>
+        // Cek tabel yang sedang tampil
+        let activeTable;
+        if($('#tableKetua').is(':visible')) {
+            activeTable = '#tableKetua';
+        } else if($('#tablePenguji1').is(':visible')) {
+            activeTable = '#tablePenguji1';
+        } else {
+            activeTable = '#tablePenguji2';
+        }
+
+        // Filter baris tabel berdasarkan nama mahasiswa (kolom ke-2)
+        $(`${activeTable} tbody tr`).each(function(){
+            let nama = $(this).find('td:nth-child(2)').text().toLowerCase();
+            if(nama.includes(filter)){
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+});
+</script>
+
+    </body>
+    </html>
